@@ -1,0 +1,26 @@
+Payroll Time Card Generator
+
+Author: Taylor Poulsen
+Date: January 2021
+
+This program takes a specifically formatted excel spreadsheet and converts
+it into a csv to then be parsed and used to generate a timecard textfile. 
+This text file will then be converted to base64 which will be sent to each of
+the employees over email as an attachment. The base64 is automatically converted
+back into a text file for them to open and look at. Finally, they are each sent
+3 text messages, one to inform them the timecard has been sent, one to inform
+them of the scheduled direct deposit date, and a final one to refer them back to
+me if they see any errors on their timecard or have any questions.
+
+
+Technologies:
+	* bash
+	* java
+
+Dependencies:
+	* xlsx2csv (convert the excel spreadsheet to a csv)
+	* java jre (parse the csv and generate the timeCard)
+   	* ssmtp (send the emails/texts)
+
+To run:
+	./SendTimeCards.sh
