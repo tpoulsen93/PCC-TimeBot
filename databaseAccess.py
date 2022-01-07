@@ -12,7 +12,7 @@ from datetime import date
 
 
 # engine = create_engine('sqlite:///database.db')
-url = os.environ['postgres:DATABASE_URL']
+url = os.environ['DATABASE_URL']
 engine = create_engine(url)
 
 meta = MetaData()
