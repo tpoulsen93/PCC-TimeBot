@@ -11,7 +11,7 @@ from twilio.twiml.messaging_response import MessagingResponse
 # import exceptions
 # import messageParser
 
-number = os.environ['test_phone']
+# number = os.environ['test_phone']
 account = os.environ['account_sid']
 token = os.environ['auth_token']
 
