@@ -45,7 +45,7 @@ def insert_time(id, time, msg):
     with engine.connect() as conn:
         conn.execute(stmt)
 
-def insert_draw(id, amount, msg);
+def insert_draw(id, amount, msg):
     stmt = insert(payroll).values(id=id, draw=amount, date=date.today(), msg=msg)
 
     with engine.connect() as conn:
