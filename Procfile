@@ -1,1 +1,1 @@
-web: python3 timeBot.py
+web: python3 test.py
