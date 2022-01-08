@@ -6,10 +6,10 @@ from pydantic import BaseModel
 app = FastAPI()
 
 
-class Item(BaseModel):
-    name: str
-    price: float
-    is_offer: Optional[bool] = None
+# class Item(BaseModel):
+#     name: str
+#     price: float
+#     is_offer: Optional[bool] = None
 
 
 @app.get("/")
