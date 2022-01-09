@@ -35,6 +35,6 @@ async def parse_message(request: Request, From: str = Form(...), Body: str = For
     else:
         print("Processed message:")
         response.message(msg)
-    print(Body)
+    print(f"[{Body}]")
     sys.stdout.flush()
     return Response(content=str(response), media_type="application/xml")
