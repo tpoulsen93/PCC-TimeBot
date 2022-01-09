@@ -25,8 +25,13 @@ def read_root():
 def read_sms(string):
     return {"this is the string": string}
 
+@app.get("/employee/{first}/{last}")
+def add_employee(first, last):
+    return {"first": first, "last": last}
 
-@app.post("/sms")
+
+
+@app.post("/time")
 async def parse_message(request: Request, From: str = Form(...), Body: str = Form(...)):
     # make sure the request is from Twillio not a rando
     validator = RequestValidator(os.environ["TWILIO_AUTH_TOKEN"])
@@ -51,13 +56,17 @@ async def parse_message(request: Request, From: str = Form(...), Body: str = For
         print("Ignored message:")
         print(f"[{Body}]")
     else:
-        response.message(msg)
-        if msg.startswith("Error") or msg.startswith("Help"):
+        if msg.startswith("Help"):
             text_usage(response)
+        elif msg.startswith("Error"):
+            response.message(msg)
+            text_usage(response)
+        else:
+            response.message(msg)
 
         print("Processed message:")
         print(f"[{Body}]")
-        print("Response:")
+        print("Responded:")
         print(f"[{msg}]")
         
 

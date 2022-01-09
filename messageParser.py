@@ -151,7 +151,7 @@ def process_message(message: str):
     # handle a time submission
     if message.lower().startswith("time") or message.lower().startswith("hours"):
         if "help" in message.lower():
-            return "Help:"
+            return "Help"
         return process_time(message)
 
     # handle a draw submission
