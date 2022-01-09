@@ -11,10 +11,11 @@ from datetime import date
 
 
 # engine = create_engine('sqlite:///database.db')
-engine = create_engine(os.environ['DATABASE_URL'])
+url = os.environ['DATABASE_URL']
+url.replace("postgres", "postgresql") # sqlalchemy deprecated postgres so this is my hacky solution...
+engine = create_engine(url)
 
 meta = MetaData()
-
 
 employees = Table(
     'employees', meta, 
