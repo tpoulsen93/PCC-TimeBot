@@ -68,6 +68,7 @@ def calculate_time(start: str, end: str, less: str, more: str) -> float:
         subtract = float(less)
     except:
         raise exceptions.LunchException
+
     if more != "":
         try:
             add = float(more)
@@ -81,13 +82,15 @@ def calculate_time(start: str, end: str, less: str, more: str) -> float:
 
 def process_time(message: str) -> str:
     mess = message.split()
-    if len(mess) < 6 or len(mess) > 7:
-        raise exceptions.TimeException
+    if len(mess) < 6:
+        return f"{time_error} Too few parameters."
+    if len(mess) > 7:
+        return f"{time_error} Too many parameters."
 
     # get the employee id
     employeeId = 1#databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
     if not employeeId:
-        raise exceptions.NoSuchUserException
+        return "Error. Employee name not found."
     
     # get the start time, end time, break time, and extra time
     start = mess[3]
@@ -99,19 +102,19 @@ def process_time(message: str) -> str:
     try:
         time = calculate_time(start, end, less, more)
     except exceptions.HoursException:
-        return (f"{time_error} Hours spot is wrong.")
+        return f"{time_error} Hours spot is wrong."
     except exceptions.MeridiemException:
-        return (f"{time_error} Meridiem is wrong. (am/pm)")
+        return f"{time_error} Meridiem is wrong. (am/pm)"
     except exceptions.MinutesException:
-        return (f"{time_error} Minutes spot is wrong.")
+        return f"{time_error} Minutes spot is wrong."
     except exceptions.IllegalTimeException:
-        return (f"{time_error} End time is earlier than start time...")
+        return f"{time_error} End time is before start time..."
     except exceptions.LunchException:
-        return ("Error. Lunch formatted incorrectly.")
+        return "Error. Subtracted hours formatted incorrectly."
     except exceptions.ExtraException:
-        return ("Error. Extra time formatted incorrectly.")
+        return "Error. Additional hours formatted incorrectly."
     except exceptions.TimeFormatException:
-        return (time_error)
+        return time_error
 
     # add the hours to the database and return the message to be texted back
     # databaseAccess.insert_time(employeeId, time, message)
