@@ -17,7 +17,7 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.post("/sms/{string}")
+@app.get("/sms/{string}")
 # async def parse_message(From: str = Form(...), Body: str = Form(...)) -> str:
 def read_sms(string):
     return {"this is the string": string}
