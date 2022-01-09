@@ -87,7 +87,12 @@ def process_time(message: str) -> str:
     
     # get the start time, end time, break time, and drive time
     # and calculate the hours to be stored in the database
-    time = calculate_time(mess[3], mess[4], mess[5], mess[6])
+
+    start = mess[3]
+    end = mess[4]
+    less = mess[5]
+    more = mess[6] if mess[6] else ""
+    time = calculate_time(start, end, less, more)
 
     # add the hours to the database and return the message to be texted back
     # databaseAccess.insert_time(employeeId, time, message)
@@ -119,6 +124,8 @@ def process_draw(message: str) -> str:
 def process_message(message: str):
     # break the message apart into an array
     mess = message.split()
+    if len(mess) < 6 or len(mess) > 7:
+        raise exceptions.TimeException
 
     # handle a time submission
     if mess[0].lower() == "time":

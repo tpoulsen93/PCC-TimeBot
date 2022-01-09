@@ -1,4 +1,5 @@
 import sys, os
+from exceptions import TimeException, TimeFormatException
 import messageParser
 
 from fastapi import FastAPI, Form, Response, Request, HTTPException
@@ -27,9 +28,13 @@ async def parse_message(request: Request, From: str = Form(...), Body: str = For
         raise HTTPException(status_code=400, detail="Error in Twilio Signature")
 
     # process the message
-    response = MessagingResponse() 
-    # msg = response.message(f"Hi {From}, you said: {Body}")
-    msg = messageParser.process_message(Body)
+    response = MessagingResponse()     
+    try:
+        msg = messageParser.process_message(Body)
+    except TimeException:
+        response.message("Usage: <time/draw> <first name> <last name> <start time> <last time> <lunch> [<extra>]")
+        response.message("Example:\nTime Taylor Poulsen 9:12 4:31 1 3")
+
     if not msg:
         print("Ignored message:")
     else:
