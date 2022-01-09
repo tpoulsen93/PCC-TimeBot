@@ -79,6 +79,8 @@ def calculate_time(start: str, end: str, less: str, more: str = "") -> float:
 
 def process_time(message: str) -> str:
     mess = message.split()
+    if len(mess) < 6 or len(mess) > 7:
+        raise exceptions.TimeException
 
     # get the employee id
     employeeId = 1#databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
@@ -101,6 +103,8 @@ def process_time(message: str) -> str:
 
 def process_draw(message: str) -> str:
     mess = message.split()
+    if len(mess) < 6 or len(mess) > 7:
+        raise exceptions.TimeException
 
     # get the employee id or return False if they don't exist
     employeeId = 1#databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
@@ -124,8 +128,6 @@ def process_draw(message: str) -> str:
 def process_message(message: str):
     # break the message apart into an array
     mess = message.split()
-    if len(mess) < 6 or len(mess) > 7:
-        raise exceptions.TimeException
 
     # handle a time submission
     if mess[0].lower() == "time":

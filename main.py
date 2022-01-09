@@ -31,9 +31,10 @@ async def parse_message(request: Request, From: str = Form(...), Body: str = For
     response = MessagingResponse()     
     try:
         msg = messageParser.process_message(Body)
-    except TimeException:
+    except:
         response.message("Usage: <time/draw> <first name> <last name> <start time> <last time> <lunch> [<extra>]")
         response.message("Example:\nTime Taylor Poulsen 9:12 4:31 1 3")
+        return Response(content=str(response), media_type="application/xml")
 
     if not msg:
         print("Ignored message:")
