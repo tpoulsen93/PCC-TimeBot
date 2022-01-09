@@ -1,7 +1,7 @@
 
 from datetime import timedelta
 from sqlalchemy.sql.sqltypes import String
-import databaseAccess
+# import databaseAccess
 import exceptions
 
 
@@ -81,7 +81,7 @@ def process_time(message: str) -> str:
     mess = message.split()
 
     # get the employee id
-    employeeId = databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
+    employeeId = 1#databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
     if not employeeId:
         raise exceptions.NoSuchUserException
     
@@ -90,7 +90,7 @@ def process_time(message: str) -> str:
     time = calculate_time(mess[3], mess[4], mess[5], mess[6])
 
     # add the hours to the database and return the message to be texted back
-    databaseAccess.insert_time(employeeId, time, message)
+    # databaseAccess.insert_time(employeeId, time, message)
     return str(time) + " hours were submitted for " + mess[1].title() + " " + mess[2].title()
 
 
@@ -98,7 +98,7 @@ def process_draw(message: str) -> str:
     mess = message.split()
 
     # get the employee id or return False if they don't exist
-    employeeId = databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
+    employeeId = 1#databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
     if not employeeId:
         raise exceptions.NoSuchUserException
 
@@ -111,7 +111,7 @@ def process_draw(message: str) -> str:
         raise exceptions.DrawException
 
     # add the draw to the database and return the message to be texted back
-    databaseAccess.insert_draw(employeeId, draw, message)
+    # databaseAccess.insert_draw(employeeId, draw, message)
     return "A $" + str(draw) + " draw was submitted for " + mess[1].title() + " " + mess[2].title()
 
 
