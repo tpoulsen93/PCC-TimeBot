@@ -33,7 +33,7 @@ async def parse_message(request: Request, From: str = Form(...), Body: str = For
     # if not message:
     #     print("We received a message but it wasn't for us")
     #     print(Body)
-    msg = response.message()
+    # msg = response.message()
     print(msg)
     sys.stdout.flush()
     return Response(content=str(response), media_type="application/xml")
