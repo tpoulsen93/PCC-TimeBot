@@ -68,11 +68,11 @@ def calculate_time(start: str, end: str, less: str, more: str) -> float:
         subtract = float(less)
     except:
         raise exceptions.LunchException
-    
-    try:
-        add = float(more)
-    except:
-        raise exceptions.ExtraException
+    if more != "":
+        try:
+            add = float(more)
+        except:
+            raise exceptions.ExtraException
 
     # compute hours for the day and return as a float rounded to 2 decimal places
     hours = endTime - startTime - timedelta(hours=subtract) + timedelta(hours=add)
