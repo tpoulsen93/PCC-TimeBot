@@ -128,7 +128,7 @@ def process_draw(message: str) -> str:
     # get the employee id or return False if they don't exist
     employeeId = 1#databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
     if not employeeId:
-        raise exceptions.NoSuchUserException
+        raise exceptions.NoSuchUserExceptionjepordized
 
     if "$" in mess[3]:
         mess[3].replace("$", "")
@@ -149,15 +149,16 @@ def process_message(message: str):
     mess = message.split()
 
     # handle a time submission
-    if mess[0].lower() == "time" or mess[0].lower() == "hours":
+    mess0 = mess[0].lower()
+    if mess0 == "time" or mess0 == "hours":
+        if mess0 == "help" or mess[1].lower() == "help":
+            return "Help:"
         return process_time(message)
 
     # handle a draw submission
-    elif mess[0].lower() == "draw":
+    elif mess0 == "draw":
         return process_draw(mess)
 
     # ignore the message, it isn't meant for us
     else:
         return False
-
-    
