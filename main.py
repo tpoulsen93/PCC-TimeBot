@@ -32,6 +32,7 @@ async def parse_message(request: Request, From: str = Form(...), Body: str = For
     validator = RequestValidator(os.environ["TWILIO_AUTH_TOKEN"])
     form_ = await request.form()
     if not validator.validate(str(request.url), form_, request.headers.get("X-Twilio-Signature", "")):
+        print("unexpected user encountered")
         raise HTTPException(status_code=400, detail="Error in Twilio Signature")
 
     # process the message
@@ -39,6 +40,7 @@ async def parse_message(request: Request, From: str = Form(...), Body: str = For
     try:
         msg = messageParser.process_message(Body)
     except Exception as e:
+        response.message("Encountered an unexpected error. Check your format and try again.")
         print("Encountered unexpected error in message:")
         print(f"[{Body}]")
         print(e)
