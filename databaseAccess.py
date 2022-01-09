@@ -1,5 +1,6 @@
 import json
 import os
+import psycopg2
 from typing_extensions import Required
 from sqlalchemy.sql.expression import false
 from sqlalchemy.sql.schema import ForeignKey
