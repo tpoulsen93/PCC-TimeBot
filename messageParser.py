@@ -5,6 +5,7 @@ from sqlalchemy.sql.sqltypes import String
 import exceptions
 
 time_error = "Error. Time formatted incorrectly."
+draw_error = "Error. Draw formatted incorrectly."
 
 
 # calculate hours for the day and return them
@@ -122,13 +123,15 @@ def process_time(message: str) -> str:
 
 def process_draw(message: str) -> str:
     mess = message.split()
-    if len(mess) != 4:
-        raise exceptions.TimeException
+    if len(mess) < 4:
+        return f"{draw_error} Too few parameters"
+    if len(mess) > 4:
+        return f"{draw_error} Too many parameters"
 
     # get the employee id or return False if they don't exist
     employeeId = 1#databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
     if not employeeId:
-        raise exceptions.NoSuchUserExceptionjepordized
+        return "Error. Employee name not found."
 
     if "$" in mess[3]:
         mess[3].replace("$", "")
@@ -145,19 +148,15 @@ def process_draw(message: str) -> str:
 
 
 def process_message(message: str):
-    # break the message apart into an array
-    mess = message.split()
-
     # handle a time submission
-    mess0 = mess[0].lower()
-    if mess0 == "time" or mess0 == "hours":
-        if mess0 == "help" or mess[1].lower() == "help":
+    if message.lower().startswith("time") or message.lower().startswith("hours"):
+        if "help" in message.lower():
             return "Help:"
         return process_time(message)
 
     # handle a draw submission
-    elif mess0 == "draw":
-        return process_draw(mess)
+    elif message.lower().startswith("draw"):
+        return process_draw(message)
 
     # ignore the message, it isn't meant for us
     else:

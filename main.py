@@ -52,9 +52,9 @@ async def parse_message(request: Request, From: str = Form(...), Body: str = For
         print(f"[{Body}]")
     else:
         response.message(msg)
-        if msg.startswith("Error") or msg.startswith("help"):
+        if msg.startswith("Error") or msg.startswith("Help"):
             text_usage(response)
-            
+
         print("Processed message:")
         print(f"[{Body}]")
         print("Response:")
