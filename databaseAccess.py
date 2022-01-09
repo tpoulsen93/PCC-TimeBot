@@ -7,13 +7,11 @@ from sqlalchemy.sql.sqltypes import Date
 from sqlalchemy import create_engine, MetaData, Table, Column, String, Integer, Float, Date
 from sqlalchemy.orm import session, sessionmaker
 from sqlalchemy import create_engine, insert
-from dotenv import load_dotenv
 from datetime import date
 
 
 # engine = create_engine('sqlite:///database.db')
-url = os.environ['DATABASE_URL']
-engine = create_engine(url)
+engine = create_engine(os.environ['DATABASE_URL'])
 
 meta = MetaData()
 
@@ -72,16 +70,16 @@ def insert_employee(first_name=None, last_name=None, wage=None, phone_number=Non
         conn.execute(stmt)
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
     # insert_employee(first_name="Taylor", last_name="Poulsen", wage="20.00",  \
     #                 phone_number="432-276-1331", email="DanielMBogden@gmail.com")
     # print("Successfull")
 
-    Session = sessionmaker(bind = engine)
-    session = Session()
-    members = session.query(employees).all()
+    # Session = sessionmaker(bind = engine)
+    # session = Session()
+    # members = session.query(employees).all()
 
-    with Session() as session:
-        t = session.query(employees).filter(employees.first_name=="Taylor").all()
-        print(t)
+    # with Session() as session:
+    #     t = session.query(employees).filter(employees.first_name=="Taylor").all()
+    #     print(t)
     

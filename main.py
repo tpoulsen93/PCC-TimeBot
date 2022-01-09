@@ -1,13 +1,20 @@
 import sys, os
-from exceptions import TimeException, TimeFormatException
+import exceptions
 import messageParser
 
 from fastapi import FastAPI, Form, Response, Request, HTTPException
 from twilio.twiml.messaging_response import MessagingResponse
 from twilio.request_validator import RequestValidator  
 
+
 app = FastAPI()
 
+
+def text_usage(response: MessagingResponse):
+    response.message(
+        "Usage: <time/draw> <first name> <last name> <start time> <last time> <lunch> [<extra>]\n\
+            Here is an example...")
+    response.message("Time Taylor Poulsen 11:46am 5:04pm 1.25 3.6")
 
 @app.get("/")
 def read_root():
@@ -31,19 +38,22 @@ async def parse_message(request: Request, From: str = Form(...), Body: str = For
     response = MessagingResponse()     
     try:
         msg = messageParser.process_message(Body)
-    except:
-        response.message("Usage: <time/draw> <first name> <last name> <start time> <last time> <lunch> [<extra>]")
-        response.message("Example:\nTime Taylor Poulsen 9:12 4:31 1 3")
+    except Exception as e:
+        print(e.with_traceback)
         return Response(content=str(response), media_type="application/xml")
 
     if not msg:
         print("Ignored message:")
         print(f"[{Body}]")
     else:
+        response.message(msg)
+        if msg.startswith("Error"):
+            text_usage(response)
         print("Processed message:")
         print(f"[{Body}]")
-        response.message(msg)
         print("Response:")
-        print(msg)
+        print(f"[{msg}]")
+        
+
     sys.stdout.flush()
     return Response(content=str(response), media_type="application/xml")
