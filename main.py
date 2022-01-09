@@ -39,6 +39,9 @@ async def parse_message(request: Request, From: str = Form(...), Body: str = For
     try:
         msg = messageParser.process_message(Body)
     except Exception as e:
+        print("Encountered unexpected error in message:")
+        print(f"[{Body}]")
+        print(e)
         print(e.with_traceback)
         return Response(content=str(response), media_type="application/xml")
 
