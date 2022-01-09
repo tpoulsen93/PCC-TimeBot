@@ -25,7 +25,7 @@ users = {
 }
 
 
-@app.post("/")
+@app.post("/sms")
 async def response(From: str = Form(...), Body: str = Form(...)) -> str:
     print(f"Mesage from: {From}")
     print(f"Body: {Body}")
