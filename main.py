@@ -30,11 +30,11 @@ async def parse_message(request: Request, From: str = Form(...), Body: str = For
     response = MessagingResponse() 
     # msg = response.message(f"Hi {From}, you said: {Body}")
     msg = messageParser.process_message(Body)
-    if not message:
+    if not msg:
         print("Ignored message:")
     else:
         print("Processed message:")
-        msg = response.message(msg)
+        response.message(msg)
     print(Body)
     sys.stdout.flush()
     return Response(content=str(response), media_type="application/xml")
