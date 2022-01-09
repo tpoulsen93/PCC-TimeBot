@@ -1,6 +1,7 @@
 import sys, os
 import exceptions
 import messageParser
+import databaseAccess
 
 from fastapi import FastAPI, Form, Response, Request, HTTPException
 from twilio.twiml.messaging_response import MessagingResponse
@@ -25,10 +26,27 @@ def read_root():
 def read_sms(string):
     return {"this is the string": string}
 
-@app.get("/employee/{first}/{last}")
-def add_employee(first, last):
-    return {"first": first, "last": last}
+@app.get("/updateEmployee/{first}/{last}/{wage}/{email}/{phone}")
+def update_employee(first, last, wage, email, phone):
+    return {
+        "first": first,
+        "last": last,
+        "wage": wage,
+        "email": email,
+        "phone": phone    
+    }
 
+
+@app.get("/addEmployee/{first}/{last}/{wage}/{email}/{phone}")
+def add_employee(first, last, wage, email, phone):
+    databaseAccess.insert_employee(first, last, float(wage), email, phone)
+    return {
+        "first": first,
+        "last": last,
+        "wage": wage,
+        "email": email,
+        "phone": phone    
+    }
 
 
 @app.post("/time")

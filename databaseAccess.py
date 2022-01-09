@@ -62,9 +62,14 @@ def get_employee_id(first: str, last: str):
     
 
 
-def insert_employee(first_name=None, last_name=None, wage=None, phone_number=None, email=None):
-    stmt = insert(employees).values(first_name=first_name, last_name=last_name, wage=wage, \
-                                    phone_number=phone_number, email=email)
+def insert_employee(first_name, last_name, wage, email="", phone_number=""):
+    stmt = insert(employees).values(
+        first_name = first_name,
+        last_name = last_name,
+        wage = wage,
+        phone_number = phone_number if phone_number != "" else None,
+        email = email if email != "" else None
+    )
 
     with engine.connect() as conn:
         conn.execute(stmt)
