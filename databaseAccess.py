@@ -1,11 +1,12 @@
 import os
-import psycopg2
+
 from sqlalchemy import MetaData, Table, Column, String, Integer, Float, Date
 from sqlalchemy import create_engine, insert, text, update, ForeignKey
 from datetime import date
 
+from sqlalchemy.sql.expression import true
 
-# engine = create_engine('sqlite:///database.db')
+
 url = os.environ['DATABASE_URL']
 url = url.replace("postgres", "postgresql") # sqlalchemy deprecated postgres so this is my hacky solution...
 engine = create_engine(url)
@@ -25,6 +26,7 @@ employees = Table(
 payroll = Table(
     'payroll', meta,
     Column('id', ForeignKey('employees.id')),
+    Column('transaction_id', Integer, autoincrement=True, primary_key=True),
     Column('time', Float),
     Column('draw', Float),
     Column('date', Date),
@@ -34,11 +36,14 @@ payroll = Table(
 meta.create_all(engine)
 
 
+# submit hours for an employee
 def insert_time(id, time, msg):
     stmt = insert(payroll).values(id=id, time=time, date=date.today(), msg=msg)
     with engine.connect() as conn:
         conn.execute(stmt)
 
+
+# submit a draw for an employee
 def insert_draw(id, amount, msg):
     stmt = insert(payroll).values(id=id, draw=amount, date=date.today(), msg=msg)
 
@@ -53,6 +58,7 @@ def get_employee_id(first: str, last: str):
     with engine.connect() as conn:
         result = conn.execute(stmt, f = first, l = last).first()
     return result
+
 
 # add a new employee to the table
 def insert_employee(first_name, last_name, wage, email="", phone=""):
@@ -80,19 +86,4 @@ def update_employee(first_name, last_name, wage, email="", phone=""):
             conn.execute(stmt)
         if phone != "":
             stmt = update(employees).values(phone_number = phone).where(id = id)
-            conn.execute(stmt)
-        
-
-# if __name__ == "__main__":
-    # insert_employee(first_name="Taylor", last_name="Poulsen", wage="20.00",  \
-    #                 phone_number="432-276-1331", email="DanielMBogden@gmail.com")
-    # print("Successfull")
-
-    # Session = sessionmaker(bind = engine)
-    # session = Session()
-    # members = session.query(employees).all()
-
-    # with Session() as session:
-    #     t = session.query(employees).filter(employees.first_name=="Taylor").all()
-    #     print(t)
-    
+            conn.execute(stmt)    
