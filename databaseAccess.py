@@ -49,7 +49,7 @@ def is_duplicate_submission(id) -> bool:
 # submit hours for an employee
 def insert_time(id, time, msg) -> str:
     if is_duplicate_submission(id):
-        stmt = update(payroll).values(time = time).where(payroll.c.id == id and payroll.c.date == date.today())
+        stmt = update(payroll).values(time = time).where(payroll.c.id is id and payroll.c.date is date.today())
     else:
         stmt = insert(payroll).values(id=id, time=time, date=date.today(), msg=msg)
     with engine.connect() as conn:
