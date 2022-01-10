@@ -1,7 +1,7 @@
 
 from datetime import timedelta
 from sqlalchemy.sql.sqltypes import String
-# import databaseAccess
+import databaseAccess
 import exceptions
 
 time_error = "Error. Time formatted incorrectly."
@@ -88,7 +88,7 @@ def process_time(message: str) -> str:
         return f"{time_error} Too many parameters."
 
     # get the employee id
-    employeeId = 1#databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
+    employeeId = databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
     if not employeeId:
         return "Error. Employee name not found."
     
@@ -117,7 +117,7 @@ def process_time(message: str) -> str:
         return time_error
 
     # add the hours to the database and return the message to be texted back
-    # databaseAccess.insert_time(employeeId, time, message)
+    databaseAccess.insert_time(employeeId, time, message)
     return f"{str(time)} hours were submitted for {mess[1].title()} {mess[2].title()}"
 
 
@@ -129,7 +129,7 @@ def process_draw(message: str) -> str:
         return f"{draw_error} Too many parameters"
 
     # get the employee id or return False if they don't exist
-    employeeId = 1#databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
+    employeeId = databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
     if not employeeId:
         return "Error. Employee name not found."
 
@@ -142,15 +142,17 @@ def process_draw(message: str) -> str:
         raise exceptions.DrawException
 
     # add the draw to the database and return the message to be texted back
-    # databaseAccess.insert_draw(employeeId, draw, message)
+    databaseAccess.insert_draw(employeeId, draw, message)
     return "A $" + str(draw) + " draw was submitted for " + mess[1].title() + " " + mess[2].title()
 
 
 
 def process_message(message: str):
+    mess = message.lower()
+
     # handle a time submission
-    if message.lower().startswith("time") or message.lower().startswith("hours"):
-        if "help" in message.lower():
+    if mess.startswith("time") or mess.startswith("hours"):
+        if "help" in mess:
             return "Help"
         return process_time(message)
 

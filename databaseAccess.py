@@ -2,7 +2,7 @@ import json
 import os
 import psycopg2
 from typing_extensions import Required
-from sqlalchemy.sql.expression import false
+from sqlalchemy.sql.expression import false, select, update
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import Date
 from sqlalchemy import create_engine, MetaData, Table, Column, String, Integer, Float, Date
@@ -42,40 +42,52 @@ meta.create_all(engine)
 
 def insert_time(id, time, msg):
     stmt = insert(payroll).values(id=id, time=time, date=date.today(), msg=msg)
-
     with engine.connect() as conn:
         conn.execute(stmt)
 
-def insert_draw(id, amount, msg):
-    stmt = insert(payroll).values(id=id, draw=amount, date=date.today(), msg=msg)
+# def insert_draw(id, amount, msg):
+#     stmt = insert(payroll).values(id=id, draw=amount, date=date.today(), msg=msg)
 
-    with engine.connect() as conn:
-        conn.execute(stmt)
+#     with engine.connect() as conn:
+#         conn.execute(stmt)
 
 
 # return true if the employee exists in the database, else return false
 def get_employee_id(first: str, last: str):
-    record = session\
-        .query(employees)\
-        .filter(employees.first_name.like(first), employees.last_name.like(last))\
-        .first()
+    stmt = employees.select(employees.c.id) \
+        .where(employees.c.first_name == first and employees.c.last_name == last)
+    with engine.connect() as conn:
+        result = conn.execute(stmt)
+    return result
 
-    return record.id if record != None else False
-    
-
-
-def insert_employee(first_name, last_name, wage, email="", phone_number=""):
+# add a new employee to the table
+def insert_employee(first_name, last_name, wage, email="", phone=""):
     stmt = insert(employees).values(
         first_name = first_name,
         last_name = last_name,
         wage = wage,
-        phone_number = phone_number if phone_number != "" else None,
+        phone_number = phone if phone != "" else None,
         email = email if email != "" else None
     )
 
     with engine.connect() as conn:
         conn.execute(stmt)
 
+
+# update wage, email, or phone for an employee
+def update_employee(first_name, last_name, wage, email="", phone=""):
+    id = get_employee_id(first_name, last_name)
+    with engine.connect() as conn:
+        if wage != 0:
+            stmt = update(employees).values(wage = wage).where(id = id)
+            conn.execute(stmt)
+        if email != "":
+            stmt = update(employees).values(email = email).where(id = id)
+            conn.execute(stmt)
+        if phone != "":
+            stmt = update(employees).values(phone_number = phone).where(id = id)
+            conn.execute(stmt)
+        
 
 # if __name__ == "__main__":
     # insert_employee(first_name="Taylor", last_name="Poulsen", wage="20.00",  \

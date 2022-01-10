@@ -49,7 +49,7 @@ def add_employee(first, last, wage, email, phone):
     }
 
 
-@app.post("/time")
+@app.post("/sms")
 async def parse_message(request: Request, From: str = Form(...), Body: str = Form(...)):
     # make sure the request is from Twillio not a rando
     validator = RequestValidator(os.environ["TWILIO_AUTH_TOKEN"])
