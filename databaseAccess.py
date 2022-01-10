@@ -1,13 +1,7 @@
-import json
-import os, sys
+import os
 import psycopg2
-from typing_extensions import Required
-from sqlalchemy.sql.expression import false, select, update
-from sqlalchemy.sql.schema import ForeignKey
-from sqlalchemy.sql.sqltypes import Date
-from sqlalchemy import create_engine, MetaData, Table, Column, String, Integer, Float, Date
-from sqlalchemy.orm import session, sessionmaker
-from sqlalchemy import create_engine, insert
+from sqlalchemy import MetaData, Table, Column, String, Integer, Float, Date
+from sqlalchemy import create_engine, insert, text, update, ForeignKey
 from datetime import date
 
 
@@ -54,15 +48,11 @@ def insert_time(id, time, msg):
 
 # return true if the employee exists in the database, else return false
 def get_employee_id(first: str, last: str):
-    stmt = employees.select().where(
-        employees.c.first_name == first and employees.c.last_name == last
-    )
+    stmt = text("SELECT employees.id FROM employees WHERE \
+        students.first_name LIKE :f AND students.last_name LIKE :l")
     with engine.connect() as conn:
-        result = conn.execute(stmt)
-        print(f"result: {result}")
-        print(f"result[0] {result[0]}")
-        sys.stdout.flush()
-    return result[0]
+        result = conn.execute(stmt, f = first, l = last).first()
+    return result
 
 # add a new employee to the table
 def insert_employee(first_name, last_name, wage, email="", phone=""):

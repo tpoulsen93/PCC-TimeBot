@@ -91,7 +91,8 @@ def process_time(message: str) -> str:
     employeeId = databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
     if not employeeId:
         return "Error. Employee name not found."
-    
+    employeeId = int(employeeId)
+
     # get the start time, end time, break time, and extra time
     start = mess[3]
     end = mess[4]
@@ -132,6 +133,7 @@ def process_draw(message: str) -> str:
     employeeId = databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
     if not employeeId:
         return "Error. Employee name not found."
+    employeeId = int(employeeId)
 
     if "$" in mess[3]:
         mess[3].replace("$", "")
