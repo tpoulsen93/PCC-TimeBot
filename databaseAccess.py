@@ -49,7 +49,7 @@ def insert_time(id, time, msg):
 # return true if the employee exists in the database, else return false
 def get_employee_id(first: str, last: str):
     stmt = text("SELECT employees.id FROM employees WHERE \
-        students.first_name LIKE :f AND students.last_name LIKE :l")
+        employees.first_name LIKE :f AND employees.last_name LIKE :l")
     with engine.connect() as conn:
         result = conn.execute(stmt, f = first, l = last).first()
     return result
