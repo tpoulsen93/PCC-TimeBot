@@ -80,6 +80,34 @@ def calculate_time(start: str, end: str, less: str, more: str) -> float:
     return round(hours / timedelta(hours=1), 2)
 
 
+
+def process_draw(message: str) -> str:
+    mess = message.split()
+    if len(mess) < 4:
+        return f"{draw_error} Too few parameters"
+    if len(mess) > 4:
+        return f"{draw_error} Too many parameters"
+
+    # get the employee id or return False if they don't exist
+    employeeId = databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
+    if not employeeId:
+        return "Error. Employee not found."
+    employeeId = int(employeeId[0])
+
+    if "$" in mess[3]:
+        mess[3].replace("$", "")
+
+    try: # cast the dollar amount to a float    
+        draw = float(mess[3])
+    except:
+        raise exceptions.DrawException
+
+    # add the draw to the database and return the message to be texted back
+    databaseAccess.insert_draw(employeeId, draw, message)
+    return "A $" + str(draw) + " draw was submitted for " + mess[1].title() + " " + mess[2].title()
+
+
+
 def process_time(message: str) -> str:
     mess = message.split()
     if len(mess) < 6:
@@ -90,7 +118,7 @@ def process_time(message: str) -> str:
     # get the employee id
     employeeId = databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
     if not employeeId:
-        return "Error. Employee name not found."
+        return "Error. Employee not found."
     employeeId = int(employeeId[0])
 
     # get the start time, end time, break time, and extra time
@@ -120,32 +148,6 @@ def process_time(message: str) -> str:
     # add the hours to the database and return the message to be texted back
     databaseAccess.insert_time(employeeId, time, message)
     return f"{str(time)} hours were submitted for {mess[1].title()} {mess[2].title()}"
-
-
-def process_draw(message: str) -> str:
-    mess = message.split()
-    if len(mess) < 4:
-        return f"{draw_error} Too few parameters"
-    if len(mess) > 4:
-        return f"{draw_error} Too many parameters"
-
-    # get the employee id or return False if they don't exist
-    employeeId = databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
-    if not employeeId:
-        return "Error. Employee name not found."
-    employeeId = int(employeeId[0])
-
-    if "$" in mess[3]:
-        mess[3].replace("$", "")
-
-    try: # cast the dollar amount to a float    
-        draw = float(mess[3])
-    except:
-        raise exceptions.DrawException
-
-    # add the draw to the database and return the message to be texted back
-    databaseAccess.insert_draw(employeeId, draw, message)
-    return "A $" + str(draw) + " draw was submitted for " + mess[1].title() + " " + mess[2].title()
 
 
 

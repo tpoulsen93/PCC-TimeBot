@@ -39,11 +39,11 @@ def insert_time(id, time, msg):
     with engine.connect() as conn:
         conn.execute(stmt)
 
-# def insert_draw(id, amount, msg):
-#     stmt = insert(payroll).values(id=id, draw=amount, date=date.today(), msg=msg)
+def insert_draw(id, amount, msg):
+    stmt = insert(payroll).values(id=id, draw=amount, date=date.today(), msg=msg)
 
-#     with engine.connect() as conn:
-#         conn.execute(stmt)
+    with engine.connect() as conn:
+        conn.execute(stmt)
 
 
 # return true if the employee exists in the database, else return false
