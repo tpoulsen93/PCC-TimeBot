@@ -4,7 +4,7 @@ from sqlalchemy import MetaData, Table, Column, String, Integer, Float, Date
 from sqlalchemy import create_engine, insert, text, update, ForeignKey
 from datetime import date
 
-from sqlalchemy.sql.expression import true
+from sqlalchemy.sql.expression import delete, true
 
 
 url = os.environ['DATABASE_URL']
@@ -36,17 +36,29 @@ payroll = Table(
 meta.create_all(engine)
 
 
+def is_duplicate_submission(id) -> bool:
+    stmt = text("SELECT payroll.time FROM payroll WHERE \
+        payroll.id LIKE :i AND payroll.date LIKE :d")
+    with engine.connect() as conn:
+        result = conn.execute(stmt, i = id, d = date.today()).first()
+    if not result:
+        return False
+    return True
+
+
 # submit hours for an employee
-def insert_time(id, time, msg):
-    stmt = insert(payroll).values(id=id, time=time, date=date.today(), msg=msg)
+def insert_time(id, time, msg) -> str:
+    if is_duplicate_submission(id):
+        stmt = update(payroll).values(time = time).where(payroll.c.id == id and payroll.c.date == date.today())
+    else:
+        stmt = insert(payroll).values(id=id, time=time, date=date.today(), msg=msg)
     with engine.connect() as conn:
         conn.execute(stmt)
 
 
 # submit a draw for an employee
-def insert_draw(id, amount, msg):
+def insert_draw(id, amount, msg) -> str:
     stmt = insert(payroll).values(id=id, draw=amount, date=date.today(), msg=msg)
-
     with engine.connect() as conn:
         conn.execute(stmt)
 
