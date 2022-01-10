@@ -1,5 +1,5 @@
 
-from datetime import timedelta
+from datetime import timedelta, date
 from sqlalchemy.sql.sqltypes import String
 import databaseAccess
 import exceptions
@@ -146,8 +146,8 @@ def process_time(message: str) -> str:
         return time_error
 
     # add the hours to the database and return the message to be texted back
-    databaseAccess.insert_time(employeeId, time, message)
-    return f"{str(time)} hours were submitted for {mess[1].title()} {mess[2].title()}"
+    submission = databaseAccess.insert_time(employeeId, time, message)
+    return f"{submission} for {mess[1].title()} {mess[2].title()} for {date.today()}"
 
 
 

@@ -36,24 +36,29 @@ payroll = Table(
 meta.create_all(engine)
 
 
-def is_duplicate_submission(id) -> bool:
+def duplicate_submission(id):
     stmt = text("SELECT payroll.time FROM payroll WHERE \
         payroll.id LIKE :i AND payroll.date LIKE :d")
     with engine.connect() as conn:
         result = conn.execute(stmt, i = id, d = date.today()).first()
     if not result:
         return False
-    return True
+    return result[0]
 
 
 # submit hours for an employee
 def insert_time(id, time, msg) -> str:
-    if is_duplicate_submission(id):
-        stmt = update(payroll).values(time = time).where(payroll.c.id is id and payroll.c.date is date.today())
-    else:
+    dupe = duplicate_submission(id)
+    if not dupe:
         stmt = insert(payroll).values(id=id, time=time, date=date.today(), msg=msg)
+        result = f"Submitted {str(time)} hours"
+    else:
+        stmt = update(payroll).values(time = time).where(payroll.c.id is id and payroll.c.date is date.today())
+        result = f"Updated hours submission from {str(dupe)} to {str(time)}"
     with engine.connect() as conn:
         conn.execute(stmt)
+    return result
+    
 
 
 # submit a draw for an employee
