@@ -54,7 +54,7 @@ def insert_time(id, time, msg):
 
 # return true if the employee exists in the database, else return false
 def get_employee_id(first: str, last: str):
-    stmt = employees.select(employees.c.id) \
+    stmt = employees.select() \
         .where(employees.c.first_name == first and employees.c.last_name == last)
     with engine.connect() as conn:
         result = conn.execute(stmt)
