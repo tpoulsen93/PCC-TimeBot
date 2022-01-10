@@ -47,13 +47,13 @@ def duplicate_submission(id):
 
 
 # submit hours for an employee
-def insert_time(id, time, msg) -> str:
+def insert_time(xid, time, msg) -> str:
     dupe = duplicate_submission(id)
     if not dupe:
-        stmt = insert(payroll).values(id=id, time=time, date=date.today(), msg=msg)
+        stmt = insert(payroll).values(xid=id, time=time, date=date.today(), msg=msg)
         result = f"Submitted {str(time)} hours"
     else:
-        stmt = update(payroll).values(time = time).where(payroll.c.id is Integer(id) and payroll.c.date is date.today())
+        stmt = update(payroll).values(time = time).where(id is Integer(xid) and date is date.today())
         result = f"Updated hours submission from {str(dupe)} to {str(time)}"
     with engine.connect() as conn:
         conn.execute(stmt)
