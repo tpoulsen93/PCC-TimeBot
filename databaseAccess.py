@@ -53,7 +53,7 @@ def insert_time(id, time, msg) -> str:
         stmt = insert(payroll).values(id=id, time=time, date=date.today(), msg=msg)
         result = f"Submitted {str(time)} hours"
     else:
-        stmt = update(payroll).values(time = time).where(payroll.c.id is id and payroll.c.date is date.today())
+        stmt = update(payroll).values(time = time).where(payroll.c.id is Integer(id) and payroll.c.date is date.today())
         result = f"Updated hours submission from {str(dupe)} to {str(time)}"
     with engine.connect() as conn:
         conn.execute(stmt)
