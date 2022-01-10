@@ -1,5 +1,5 @@
 import json
-import os
+import os, sys
 import psycopg2
 from typing_extensions import Required
 from sqlalchemy.sql.expression import false, select, update
@@ -61,6 +61,7 @@ def get_employee_id(first: str, last: str):
         result = conn.execute(stmt)
         print(f"result: {result}")
         print(f"result[0] {result[0]}")
+        sys.stdout.flush()
     return result[0]
 
 # add a new employee to the table
