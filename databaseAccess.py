@@ -59,6 +59,8 @@ def get_employee_id(first: str, last: str):
     )
     with engine.connect() as conn:
         result = conn.execute(stmt)
+        print(f"result: {result}")
+        print(f"result[0] {result[0]}")
     return result[0]
 
 # add a new employee to the table
