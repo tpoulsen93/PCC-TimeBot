@@ -20,7 +20,7 @@ employees = Table(
     Column('first_name', String),
     Column('last_name', String),
     Column('wage', Float),
-    Column('phone_number', String, unique=True),
+    Column('phone', String, unique=True),
     Column('email', String)
 )
 
@@ -30,7 +30,7 @@ payroll = Table(
     Column('transaction_id', Integer, autoincrement=True, primary_key=True),
     Column('time', Float),
     Column('date', Date),
-    Column('msg', String)
+    Column('message', String)
 )
 
 meta.create_all(engine)
@@ -55,11 +55,11 @@ def insert_time(id, time, msg) -> str:
 
     dupe = duplicate_submission(id)
     if not dupe:
-        stmt = insert(payroll).values(id = id, time = time, date = today, msg = msg)
+        stmt = insert(payroll).values(id = id, time = time, date = today, message = msg)
         result = f"Submitted {str(time)} hours"
     else:
         stmt = text("UPDATE payroll SET time = :t, msg = :m WHERE id = :i AND date = :d")
-        result = f"Updated hours submission from {str(dupe)} to {str(time)}"
+        result = f"Updated submission from {str(dupe)} to {str(time)}"
     with engine.connect() as conn:
         conn.execute(stmt, t = time, m = msg, i = id, d = today)
     return result
@@ -80,7 +80,7 @@ def insert_employee(first_name, last_name, wage, email = "", phone = ""):
         first_name = first_name,
         last_name = last_name,
         wage = wage,
-        phone_number = phone if phone != "" else None,
+        phone = phone if phone != "" else None,
         email = email if email != "" else None
     )
 
@@ -99,5 +99,5 @@ def update_employee(first_name, last_name, wage, email = "", phone = ""):
             stmt = update(employees).values(email = email).where(id = id)
             conn.execute(stmt)
         if phone != "":
-            stmt = update(employees).values(phone_number = phone).where(id = id)
+            stmt = update(employees).values(phone = phone).where(id = id)
             conn.execute(stmt)    
