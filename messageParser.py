@@ -123,7 +123,7 @@ def process_time(message: str) -> str:
     today = (datetime.datetime.today() - timedelta(hours=7)).date()
 
     # add the hours to the database and return the message to be texted back
-    submission = databaseAccess.insert_time(employeeId, time, message)
+    submission = databaseAccess.submit_time(employeeId, time, message)
     return f"{submission} for {mess[1].title()} {mess[2].title()} for {today}"
 
 

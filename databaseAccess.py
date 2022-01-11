@@ -49,7 +49,7 @@ def duplicate_submission(id):
 
 
 # submit hours for an employee
-def insert_time(id, time, msg) -> str:
+def submit_time(id, time, msg) -> str:
     # heroku uses utc time and we need mountain time so this is my hacky conversion
     today = (datetime.datetime.today() - timedelta(hours=7)).date()
 
@@ -58,7 +58,7 @@ def insert_time(id, time, msg) -> str:
         stmt = insert(payroll).values(id = id, time = time, date = today, message = msg)
         result = f"Submitted {str(time)} hours"
     else:
-        stmt = text("UPDATE payroll SET time = :t, msg = :m WHERE id = :i AND date = :d")
+        stmt = text("UPDATE payroll SET time = :t, message = :m WHERE id = :i AND date = :d")
         result = f"Updated submission from {str(dupe)} to {str(time)}"
     with engine.connect() as conn:
         conn.execute(stmt, t = time, m = msg, i = id, d = today)
@@ -75,7 +75,7 @@ def get_employee_id(first: str, last: str):
 
 
 # add a new employee to the table
-def insert_employee(first_name, last_name, wage, email = "", phone = ""):
+def add_employee(first_name, last_name, wage, email = "", phone = ""):
     stmt = insert(employees).values(
         first_name = first_name,
         last_name = last_name,
