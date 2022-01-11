@@ -1,10 +1,11 @@
 import os
+import datetime
+
+from datetime import timedelta
 
 from sqlalchemy import MetaData, Table, Column, String, Integer, Float, Date
-from sqlalchemy import create_engine, insert, text, update, ForeignKey, bindparam
-from datetime import date, datetime, timedelta
+from sqlalchemy import create_engine, insert, text, update, delete, true, ForeignKey
 
-from sqlalchemy.sql.expression import delete, true
 
 
 url = os.environ['DATABASE_URL']
