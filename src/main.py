@@ -1,6 +1,6 @@
+import src.messageParser as messageParser
+import src.databaseAccess as databaseAccess
 import sys, os
-import messageParser
-import databaseAccess
 
 from fastapi import FastAPI, Form, Response, Request, HTTPException
 from twilio.twiml.messaging_response import MessagingResponse
