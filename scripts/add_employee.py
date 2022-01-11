@@ -1,3 +1,5 @@
+#!/bin/python3
+
 import requests
 import pprint
 import json
@@ -21,4 +23,5 @@ phone = sys.argv[5]
 
 response = requests.get(f"{base}/{first}/{last}/{wage}/{email}/{phone}")
 
-pprint.pprint(json.loads(response.content))
+# pprint.pprint(json.loads(response.content))
+print(response.text)

@@ -33,7 +33,7 @@ def update_employee(first, last, target, value):
 
 @app.get("/addEmployee/{first}/{last}/{wage}/{email}/{phone}")
 def add_employee(first, last, wage, email, phone):
-    databaseAccess.insert_employee(first, last, float(wage), email, phone)
+    databaseAccess.add_employee(first, last, float(wage), email, phone)
     return {
         "first": first,
         "last": last,

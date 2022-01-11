@@ -1,3 +1,5 @@
+#!/bin/python3
+
 import requests
 import pprint
 import json
