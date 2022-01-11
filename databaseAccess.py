@@ -40,8 +40,9 @@ meta.create_all(engine)
 def duplicate_submission(id):
     # heroku uses utc time and we need mountain time so this is my hacky conversion
     today = (datetime.datetime.today() - timedelta(hours=7)).date()
-    stmt = text("SELECT payroll.time FROM payroll WHERE \
-        payroll.id LIKE :i AND payroll.date LIKE :d")
+
+    stmt = text("SELECT time FROM payroll WHERE \
+        id LIKE :i AND date LIKE :d")
     with engine.connect() as conn:
         result = conn.execute(stmt, i = id, d = today).first()
     if not result:
@@ -53,6 +54,7 @@ def duplicate_submission(id):
 def insert_time(id, time, msg) -> str:
     # heroku uses utc time and we need mountain time so this is my hacky conversion
     today = (datetime.datetime.today() - timedelta(hours=7)).date()
+
     dupe = duplicate_submission(id)
     if not dupe:
         stmt = insert(payroll).values(id = id, time = time, date = today, msg = msg)
@@ -70,6 +72,7 @@ def insert_time(id, time, msg) -> str:
 def insert_draw(id, amount, msg) -> str:
     # heroku uses utc time and we need mountain time so this is my hacky conversion
     today = (datetime.datetime.today() - timedelta(hours=7)).date()
+    
     stmt = insert(payroll).values(id = id, draw = amount, date = today, msg = msg)
     with engine.connect() as conn:
         conn.execute(stmt)
