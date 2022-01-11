@@ -53,14 +53,10 @@ def insert_time(id, time, msg) -> str:
         stmt = insert(payroll).values(id=id, time=time, date=date.today(), msg=msg)
         result = f"Submitted {str(time)} hours"
     else:
-        # stmt = text("UPDATE payroll.time FROM payroll WHERE \
-        #     payroll.id = :x AND payroll.date = :d")
-        stmt = update(payroll)\
-            .where(id == bindparam(id) and date == bindparam(date.today()))\
-            .values(time = bindparam(time))
+        stmt = text("UPDATE payroll SET time = :t WHERE id = :i AND date = :d")
         result = f"Updated hours submission from {str(dupe)} to {str(time)}"
     with engine.connect() as conn:
-        conn.execute(stmt)
+        conn.execute(stmt, t = time, i = id, d = date.today())
     return result
     
 
