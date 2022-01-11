@@ -1,5 +1,4 @@
 import sys, os
-import exceptions
 import messageParser
 import databaseAccess
 
@@ -22,18 +21,13 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/test/{string}")
-def read_sms(string):
-    return {"this is the string": string}
-
-@app.get("/updateEmployee/{first}/{last}/{wage}/{email}/{phone}")
-def update_employee(first, last, wage, email, phone):
+@app.get("/updateEmployee/{first}/{last}/{target}/{value}")
+def update_employee(first, last, target, value):
+    databaseAccess.update_employee(first, last, target, value)
     return {
         "first": first,
         "last": last,
-        "wage": wage,
-        "email": email,
-        "phone": phone    
+        target: value
     }
 
 

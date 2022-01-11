@@ -4,9 +4,7 @@ import datetime
 
 from datetime import timedelta
 
-
 time_error = "Error. Time formatted incorrectly."
-draw_error = "Error. Draw formatted incorrectly."
 
 
 # calculate hours for the day and return them

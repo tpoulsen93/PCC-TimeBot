@@ -9,9 +9,9 @@ from sqlalchemy import create_engine, insert, text, update, delete, true, Foreig
 
 
 url = os.environ['DATABASE_URL']
-url = url.replace("postgres", "postgresql") # sqlalchemy deprecated postgres so this is my hacky solution...
+# sqlalchemy deprecated postgres so this is another hacky solution...
+url = url.replace("postgres", "postgresql") 
 engine = create_engine(url)
-
 meta = MetaData()
 
 employees = Table(
@@ -58,7 +58,8 @@ def submit_time(id, time, msg) -> str:
         stmt = insert(payroll).values(id = id, time = time, date = today, message = msg)
         result = f"Submitted {str(time)} hours"
     else:
-        stmt = text("UPDATE payroll SET time = :t, message = :m WHERE id = :i AND date = :d")
+        stmt = text("UPDATE payroll SET time = :t, message = :m \
+            WHERE id = :i AND date = :d")
         result = f"Updated submission from {str(dupe)} to {str(time)}"
     with engine.connect() as conn:
         conn.execute(stmt, t = time, m = msg, i = id, d = today)
@@ -67,37 +68,29 @@ def submit_time(id, time, msg) -> str:
 
 # return true if the employee exists in the database, else return false
 def get_employee_id(first: str, last: str):
-    stmt = text("SELECT employees.id FROM employees WHERE \
-        employees.first_name LIKE :f AND employees.last_name LIKE :l")
+    stmt = text("SELECT id FROM employees \
+        WHERE first_name = :f AND last_name = :l")
     with engine.connect() as conn:
         result = conn.execute(stmt, f = first, l = last).first()
     return result
 
 
 # add a new employee to the table
-def add_employee(first_name, last_name, wage, email = "", phone = ""):
+def add_employee(first, last, wage, email = "", phone = ""):
     stmt = insert(employees).values(
-        first_name = first_name,
-        last_name = last_name,
+        first_name = first,
+        last_name = last,
         wage = wage,
         phone = phone if phone != "" else None,
         email = email if email != "" else None
     )
-
     with engine.connect() as conn:
         conn.execute(stmt)
 
 
 # update wage, email, or phone for an employee
-def update_employee(first_name, last_name, wage, email = "", phone = ""):
-    id = get_employee_id(first_name, last_name)
+def update_employee(first, last, target, value):
+    id = get_employee_id(first, last)
+    stmt = text("UPDATE employees SET :t = :v WHERE id = :i")
     with engine.connect() as conn:
-        if wage != 0:
-            stmt = update(employees).values(wage = wage).where(id = id)
-            conn.execute(stmt)
-        if email != "":
-            stmt = update(employees).values(email = email).where(id = id)
-            conn.execute(stmt)
-        if phone != "":
-            stmt = update(employees).values(phone = phone).where(id = id)
-            conn.execute(stmt)    
+        conn.execute(stmt, t = target, v = value, i = id)
