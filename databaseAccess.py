@@ -2,7 +2,7 @@ import os
 
 from sqlalchemy import MetaData, Table, Column, String, Integer, Float, Date
 from sqlalchemy import create_engine, insert, text, update, ForeignKey, bindparam
-from datetime import date
+from datetime import date, datetime, timedelta
 
 from sqlalchemy.sql.expression import delete, true
 
@@ -37,10 +37,12 @@ meta.create_all(engine)
 
 
 def duplicate_submission(id):
+    # heroku uses utc time and we need mountain time so this is my hacky conversion
+    today = (datetime.datetime.today() - timedelta(hours=7)).date()
     stmt = text("SELECT payroll.time FROM payroll WHERE \
         payroll.id LIKE :i AND payroll.date LIKE :d")
     with engine.connect() as conn:
-        result = conn.execute(stmt, i = id, d = date.today()).first()
+        result = conn.execute(stmt, i = id, d = today).first()
     if not result:
         return False
     return result[0]
@@ -48,22 +50,26 @@ def duplicate_submission(id):
 
 # submit hours for an employee
 def insert_time(id, time, msg) -> str:
+    # heroku uses utc time and we need mountain time so this is my hacky conversion
+    today = (datetime.datetime.today() - timedelta(hours=7)).date()
     dupe = duplicate_submission(id)
     if not dupe:
-        stmt = insert(payroll).values(id=id, time=time, date=date.today(), msg=msg)
+        stmt = insert(payroll).values(id = id, time = time, date = today, msg = msg)
         result = f"Submitted {str(time)} hours"
     else:
-        stmt = text("UPDATE payroll SET time = :t WHERE id = :i AND date = :d")
+        stmt = text("UPDATE payroll SET time = :t, msg = :m WHERE id = :i AND date = :d")
         result = f"Updated hours submission from {str(dupe)} to {str(time)}"
     with engine.connect() as conn:
-        conn.execute(stmt, t = time, i = id, d = date.today())
+        conn.execute(stmt, t = time, m = msg, i = id, d = today)
     return result
     
 
 
 # submit a draw for an employee
 def insert_draw(id, amount, msg) -> str:
-    stmt = insert(payroll).values(id=id, draw=amount, date=date.today(), msg=msg)
+    # heroku uses utc time and we need mountain time so this is my hacky conversion
+    today = (datetime.datetime.today() - timedelta(hours=7)).date()
+    stmt = insert(payroll).values(id = id, draw = amount, date = today, msg = msg)
     with engine.connect() as conn:
         conn.execute(stmt)
 
@@ -78,7 +84,7 @@ def get_employee_id(first: str, last: str):
 
 
 # add a new employee to the table
-def insert_employee(first_name, last_name, wage, email="", phone=""):
+def insert_employee(first_name, last_name, wage, email = "", phone = ""):
     stmt = insert(employees).values(
         first_name = first_name,
         last_name = last_name,
@@ -92,7 +98,7 @@ def insert_employee(first_name, last_name, wage, email="", phone=""):
 
 
 # update wage, email, or phone for an employee
-def update_employee(first_name, last_name, wage, email="", phone=""):
+def update_employee(first_name, last_name, wage, email = "", phone = ""):
     id = get_employee_id(first_name, last_name)
     with engine.connect() as conn:
         if wage != 0:
