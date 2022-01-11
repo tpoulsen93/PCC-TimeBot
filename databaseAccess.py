@@ -1,7 +1,7 @@
 import os
 
 from sqlalchemy import MetaData, Table, Column, String, Integer, Float, Date
-from sqlalchemy import create_engine, insert, text, update, ForeignKey
+from sqlalchemy import create_engine, insert, text, update, ForeignKey, bindparam
 from datetime import date
 
 from sqlalchemy.sql.expression import delete, true
@@ -50,13 +50,14 @@ def duplicate_submission(id):
 def insert_time(id, time, msg) -> str:
     dupe = duplicate_submission(id)
     if not dupe:
-        stmt = insert(payroll).values(xid=id, time=time, date=date.today(), msg=msg)
+        stmt = insert(payroll).values(id=id, time=time, date=date.today(), msg=msg)
         result = f"Submitted {str(time)} hours"
     else:
         # stmt = text("UPDATE payroll.time FROM payroll WHERE \
         #     payroll.id = :x AND payroll.date = :d")
-        d = date.today()
-        stmt = update(payroll).values(time = time).where(id = id and date = d)
+        stmt = update(payroll)\
+            .where(id == bindparam(id) and date == bindparam(date.today()))\
+            .values(time = bindparam(time))
         result = f"Updated hours submission from {str(dupe)} to {str(time)}"
     with engine.connect() as conn:
         conn.execute(stmt)
