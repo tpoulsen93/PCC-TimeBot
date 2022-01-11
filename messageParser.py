@@ -1,8 +1,9 @@
-
-from datetime import timedelta, date
-from sqlalchemy.sql.sqltypes import String
 import databaseAccess
 import exceptions
+import datetime
+
+from datetime import timedelta
+
 
 time_error = "Error. Time formatted incorrectly."
 draw_error = "Error. Draw formatted incorrectly."
@@ -81,33 +82,6 @@ def calculate_time(start: str, end: str, less: str, more: str) -> float:
 
 
 
-def process_draw(message: str) -> str:
-    mess = message.split()
-    if len(mess) < 4:
-        return f"{draw_error} Too few parameters"
-    if len(mess) > 4:
-        return f"{draw_error} Too many parameters"
-
-    # get the employee id or return False if they don't exist
-    employeeId = databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
-    if not employeeId:
-        return "Error. Employee not found."
-    employeeId = int(employeeId[0])
-
-    if "$" in mess[3]:
-        mess[3].replace("$", "")
-
-    try: # cast the dollar amount to a float    
-        draw = float(mess[3])
-    except:
-        raise exceptions.DrawException
-
-    # add the draw to the database and return the message to be texted back
-    databaseAccess.insert_draw(employeeId, draw, message)
-    return "A $" + str(draw) + " draw was submitted for " + mess[1].title() + " " + mess[2].title()
-
-
-
 def process_time(message: str) -> str:
     mess = message.split()
     if len(mess) < 6:
@@ -145,9 +119,12 @@ def process_time(message: str) -> str:
     except exceptions.TimeFormatException:
         return time_error
 
+    # heroku uses utc time and we need mountain time so this is my hacky conversion
+    today = (datetime.datetime.today() - timedelta(hours=7)).date()
+
     # add the hours to the database and return the message to be texted back
     submission = databaseAccess.insert_time(employeeId, time, message)
-    return f"{submission} for {mess[1].title()} {mess[2].title()} for {date.today()}"
+    return f"{submission} for {mess[1].title()} {mess[2].title()} for {today}"
 
 
 
@@ -159,10 +136,6 @@ def process_message(message: str):
         if "help" in mess:
             return "Help"
         return process_time(message)
-
-    # handle a draw submission
-    elif message.lower().startswith("draw"):
-        return process_draw(message)
 
     # ignore the message, it isn't meant for us
     else:

@@ -29,7 +29,6 @@ payroll = Table(
     Column('id', ForeignKey('employees.id')),
     Column('transaction_id', Integer, autoincrement=True, primary_key=True),
     Column('time', Float),
-    Column('draw', Float),
     Column('date', Date),
     Column('msg', String)
 )
@@ -64,17 +63,6 @@ def insert_time(id, time, msg) -> str:
     with engine.connect() as conn:
         conn.execute(stmt, t = time, m = msg, i = id, d = today)
     return result
-    
-
-
-# submit a draw for an employee
-def insert_draw(id, amount, msg) -> str:
-    # heroku uses utc time and we need mountain time so this is my hacky conversion
-    today = (datetime.datetime.today() - timedelta(hours=7)).date()
-
-    stmt = insert(payroll).values(id = id, draw = amount, date = today, msg = msg)
-    with engine.connect() as conn:
-        conn.execute(stmt)
 
 
 # return true if the employee exists in the database, else return false
