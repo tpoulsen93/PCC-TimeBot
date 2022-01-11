@@ -36,6 +36,9 @@ def insert_draw(id, amount, msg) -> str:
     with engine.connect() as conn:
         conn.execute(stmt)
 
+
+
+
 # ******    messageParser.py    ******
 # handle a draw submission
     elif message.lower().startswith("draw"):
