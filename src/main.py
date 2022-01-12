@@ -18,29 +18,31 @@ def text_usage(response: MessagingResponse):
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"PCC": "Poulsen Concrete Contractors Inc."}
 
 
 @app.get("/updateEmployee/{first}/{last}/{target}/{value}")
-def update_employee(first, last, target, value):
-    databaseAccess.update_employee(first, last, target, value)
-    return {
-        "first": first,
-        "last": last,
-        target: value
-    }
+def update_employee(first, last, target, value) -> str:
+    try:
+        databaseAccess.update_employee(first, last, target, value)
+    except:
+        return "Failed to update employee"
+    return f"Employee successfully updated:\n\
+                Name:   {first} {last}\n\
+                {target.title()}:   {value}"
 
 
 @app.get("/addEmployee/{first}/{last}/{wage}/{email}/{phone}")
-def add_employee(first, last, wage, email, phone):
-    databaseAccess.add_employee(first, last, float(wage), email, phone)
-    return {
-        "first": first,
-        "last": last,
-        "wage": wage,
-        "email": email,
-        "phone": phone    
-    }
+def add_employee(first, last, wage, email, phone) -> str:
+    try:
+        databaseAccess.add_employee(first, last, wage, email, phone)
+    except:
+        return "Failed to add employee"
+    return f"Employee successfully added:\n\
+                Name:   {first} {last}\n\
+                Wage:   ${wage}/hr\n\
+                Email:  {email}\n\
+                Phone:  {phone}"
 
 
 @app.post("/sms")
