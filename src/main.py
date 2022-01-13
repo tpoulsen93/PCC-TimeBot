@@ -1,4 +1,3 @@
-from starlette.responses import JSONResponse
 import src.messageParser as messageParser
 import src.databaseAccess as databaseAccess
 import json, sys, os
