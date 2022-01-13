@@ -1,6 +1,7 @@
+from starlette.responses import JSONResponse
 import src.messageParser as messageParser
 import src.databaseAccess as databaseAccess
-import sys, os
+import json, sys, os
 
 from fastapi import FastAPI, Form, Response, Request, HTTPException
 from twilio.twiml.messaging_response import MessagingResponse
@@ -21,12 +22,22 @@ def read_root():
     return {"PCC": "Poulsen Concrete Contractors Inc."}
 
 
+@app.get("/getTimeCards/{start}/{end}")
+def get_time_cards(start, end):
+    try:
+        result = databaseAccess.get_time_cards(start, end)
+    except:
+        return f"Failed to get time cards... whoopsies :("
+    return json.dumps(result)
+
+
+
 @app.get("/updateEmployee/{first}/{last}/{target}/{value}")
 def update_employee(first, last, target, value) -> str:
     try:
         databaseAccess.update_employee(first, last, target, value)
     except:
-        return "Failed to update employee"
+        return "Something bad happened... Failed to update employee"
     return f"Employee successfully updated:\n\
                 Name:   {first} {last}\n\
                 {target.title()}:   {value}"
@@ -37,7 +48,7 @@ def add_employee(first, last, wage, email, phone) -> str:
     try:
         databaseAccess.add_employee(first, last, wage, email, phone)
     except:
-        return "Failed to add employee"
+        return "Something bad happened... Failed to add employee"
     return f"Employee successfully added:\n\
                 Name:   {first} {last}\n\
                 Wage:   ${wage}/hr\n\

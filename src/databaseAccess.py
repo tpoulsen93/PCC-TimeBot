@@ -1,3 +1,4 @@
+from src.timeCardGeneration import buildTimeCards
 import datetime, os
 
 from datetime import timedelta
@@ -8,7 +9,6 @@ from sqlalchemy import create_engine, insert, text, update, delete, true, Foreig
 
 
 url = os.environ['DATABASE_URL']
-# sqlalchemy deprecated postgres so this is another hacky solution...
 url = url.replace("postgres", "postgresql") 
 engine = create_engine(url)
 meta = MetaData()
@@ -65,13 +65,25 @@ def submit_time(id, time, msg) -> str:
     return result
 
 
-# return true if the employee exists in the database, else return false
+# return the id number of the employee if they exist
 def get_employee_id(first: str, last: str):
     stmt = text("SELECT id FROM employees \
         WHERE first_name = :f AND last_name = :l")
     with engine.connect() as conn:
         result = conn.execute(stmt, f = first, l = last).first()
     return result
+
+
+# return the first and last name of the employee associated with the id
+def get_employee_name(id) -> str:
+    stmt = text("SELECT first_name, last_name FROM employees \
+        WHERE id = :i")
+    with engine.connect() as conn:
+        result = conn.execute(stmt, i = id)
+    
+    first = result[0]
+    last = result[1]
+    return f"{first} {last}"
 
 
 # add a new employee to the table
@@ -93,3 +105,16 @@ def update_employee(first, last, target, value):
     stmt = text("UPDATE employees SET :t = :v WHERE id = :i")
     with engine.connect() as conn:
         conn.execute(stmt, t = target, v = value, i = id)
+
+
+# get all the information for the indicated dates from the database and send them
+# to the parser to build the json object of time cards
+def get_time_cards(start, end):
+    stmt = text("SELECT id, time, date FROM payroll \
+        WHERE date >= :s AND date <= :e GROUP BY id ORDER BY date")
+    with engine.connect() as conn:
+        result = conn.execute(stmt, s = start, e = end)
+
+    return buildTimeCards(result, start, end)
+
+

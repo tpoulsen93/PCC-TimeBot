@@ -2,8 +2,6 @@ import src.exceptions as exceptions
 from datetime import timedelta
 
 
-
-
 # calculate hours for the day and return them
 def calculate_time(start: str, end: str, less: str, more: str) -> float:
     # length of times should be 6 or 7  -->  00:00xm or 0:00xm

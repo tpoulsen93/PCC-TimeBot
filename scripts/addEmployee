@@ -1,13 +1,11 @@
 #!/bin/python3
 
 import requests
-import pprint
-import json
 import sys
 
 
 def print_usage():
-    print("Usage: add_employee.py <first> <last> <wage> <email> <phone>")
+    print("Usage: ./addEmployee <first> <last> <wage> <email> <phone>")
     sys.exit()
 
 # check commandline arguments
@@ -23,5 +21,4 @@ phone = sys.argv[5]
 
 response = requests.get(f"{base}/{first}/{last}/{wage}/{email}/{phone}")
 
-# pprint.pprint(json.loads(response.content))
 print(response.text)
