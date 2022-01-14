@@ -41,7 +41,7 @@ def calculate_time(start: str, end: str, less: str, more: str) -> float:
         else: # neither am nor pm detected
             raise MeridiemException
 
-        if start < 1 or start > 12:
+        if startHours < 1 or startHours > 12:
             raise HoursException
 
     startTime = timedelta(hours=startHours, minutes=startMinutes)
