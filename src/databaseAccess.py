@@ -63,7 +63,7 @@ def submit_time(id, time, msg) -> str:
         result = f"Updated submission from {str(dupe)} to {str(time)} hours"
     with engine.connect() as conn:
         conn.execute(stmt, t = time, m = msg, i = id, d = today)
-    return 
+    return result
     
 
 # add hours for an employee on specific date
