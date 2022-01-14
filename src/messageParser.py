@@ -1,5 +1,5 @@
 import src.databaseAccess as databaseAccess
-import src.exceptions as exceptions
+from src.exceptions import *
 import datetime
 
 from src.timeCalc import calculate_time
@@ -30,19 +30,19 @@ def process_time(message: str) -> str:
     # calculate the hours for the day or return an error message
     try:
         time = calculate_time(start, end, less, more)
-    except exceptions.HoursException:
+    except HoursException:
         return f"{time_error} Hours spot is wrong."
-    except exceptions.MeridiemException:
+    except MeridiemException:
         return f"{time_error} Meridiem is wrong. (am/pm)"
-    except exceptions.MinutesException:
+    except MinutesException:
         return f"{time_error} Minutes spot is wrong."
-    except exceptions.IllegalTimeException:
+    except IllegalTimeException:
         return f"{time_error} End time is before start time..."
-    except exceptions.LunchException:
+    except LunchException:
         return "Error. Subtracted hours formatted incorrectly."
-    except exceptions.ExtraException:
+    except ExtraException:
         return "Error. Additional hours formatted incorrectly."
-    except exceptions.TimeFormatException:
+    except TimeFormatException:
         return time_error
 
     # heroku uses utc time and we need mountain time so this is my hacky conversion

@@ -21,13 +21,13 @@ def read_root():
     return {"PCC": "Poulsen Concrete Contractors Inc."}
 
 
-# @app.get("/addHours/{date}/{time}")
-# def add_hours(date, time):
-#     try:
-#         result = databaseAccess.add_hours(date, time)
-#     except:
-#         return f"Failed to add hours" 
-#     return json.dumps(result)
+@app.get("/addHours/{first}/{last}/{date}/{time}")
+def add_hours(first, last, date, time):
+    try:
+        result = databaseAccess.add_hours(first, last, date, time)
+    except:
+        return f"Failed to add hours... yikes" 
+    return f"Submitted {time} hours on {date} for {first} {last}"
 
 
 @app.get("/getTimeCards/{start}/{end}")

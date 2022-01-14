@@ -63,8 +63,22 @@ def submit_time(id, time, msg) -> str:
         result = f"Updated submission from {str(dupe)} to {str(time)} hours"
     with engine.connect() as conn:
         conn.execute(stmt, t = time, m = msg, i = id, d = today)
-    return result
+    return 
+    
 
+# add hours for an employee on specific date
+def add_time(first, last, date, time):
+    today = (datetime.datetime.today() - timedelta(hours=7)).date()
+
+    id = get_employee_id(first, last)
+    stmt = insert(payroll).values(
+        id = id,
+        time = time,
+        date = date,
+        message = f"Added manually on {today}"
+    )
+    with engine.connect() as conn:
+        conn.execute(stmt)
 
 # return the id number of the employee if they exist
 def get_employee_id(first: str, last: str):

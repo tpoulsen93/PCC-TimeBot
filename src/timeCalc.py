@@ -43,7 +43,6 @@ def calculate_time(start: str, end: str, less: str, more: str) -> float:
     startTime = timedelta(hours=startHours, minutes=startMinutes)
 
             
-
     # build clock-out time
     if len(end) > 4:    # 9:00am
         arr = end.lower().split(":")
@@ -81,7 +80,6 @@ def calculate_time(start: str, end: str, less: str, more: str) -> float:
             raise HoursException
     
     endTime = timedelta(hours=endHours, minutes=endMinutes)
-
 
 
     # check for any other exceptions in the message
