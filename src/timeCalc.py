@@ -6,7 +6,7 @@ from datetime import timedelta
 def calculate_time(start: str, end: str, less: str, more: str) -> float:
     # build clock-in time
     if len(start) > 4:  # 9:00am
-        arr = start.split(":")
+        arr = start.lower().split(":")
 
         # validate the start hours and meridiem
         startHours = int(arr[0])
@@ -37,7 +37,7 @@ def calculate_time(start: str, end: str, less: str, more: str) -> float:
         else: # neither am nor pm detected
             raise MeridiemException
 
-        if startHours < 1 or startHours > 12:
+        if startHours < 1 or startHours > 24:
             raise HoursException
 
     startTime = timedelta(hours=startHours, minutes=startMinutes)
@@ -46,7 +46,7 @@ def calculate_time(start: str, end: str, less: str, more: str) -> float:
 
     # build clock-out time
     if len(end) > 4:    # 9:00am
-        arr = end.split(":")
+        arr = end.lower().split(":")
 
         # validate end hours and meridiem
         endHours = int(arr[0])
@@ -77,7 +77,7 @@ def calculate_time(start: str, end: str, less: str, more: str) -> float:
         else: # neither am nor pm detected
             raise MeridiemException
 
-        if endHours < 1 or endHours > 12:
+        if endHours < 1 or endHours > 24:
             raise HoursException
     
     endTime = timedelta(hours=endHours, minutes=endMinutes)
