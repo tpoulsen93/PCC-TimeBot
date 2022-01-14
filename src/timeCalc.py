@@ -9,7 +9,7 @@ def calculate_time(start: str, end: str, less: str, more: str) -> float:
         raise TimeFormatException
 
     # build clock-in time
-    if len(start > 4):  # 9:00am
+    if len(start) > 4:  # 9:00am
         arr = start.split(":")
 
         # validate the start hours and meridiem

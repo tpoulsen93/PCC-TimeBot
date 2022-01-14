@@ -18,8 +18,8 @@ base = "https://pcc-time-bot.herokuapp.com/addHours"
 first = sys.argv[1]
 last = sys.argv[2]
 date = sys.argv[3]
-hours = sys.argv[4]
+time = sys.argv[4]
 
-response = requests.get(f"{base}/{first}/{last}/{date}/{hours}")
+response = requests.get(f"{base}/{first}/{last}/{date}/{time}")
 
 print(response.text)
