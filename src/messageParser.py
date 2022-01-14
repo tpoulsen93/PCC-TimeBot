@@ -50,7 +50,7 @@ def process_time(message: str) -> str:
 
     # add the hours to the database and return the message to be texted back
     submission = databaseAccess.submit_time(employeeId, time, message)
-    return f"{submission} for {mess[1].title()} {mess[2].title()} for {today}"
+    return f"{today}\n{submission} for {mess[1].title()} {mess[2].title()}"
 
 
 
