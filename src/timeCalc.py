@@ -4,10 +4,6 @@ from datetime import timedelta
 
 # calculate hours for the day and return them
 def calculate_time(start: str, end: str, less: str, more: str) -> float:
-    # length of times should be 6 or 7  -->  00:00xm or 0:00xm
-    if len(start) < 3 or len(start) > 7 or len(end) < 3 or len(end) > 7:
-        raise TimeFormatException
-
     # build clock-in time
     if len(start) > 4:  # 9:00am
         arr = start.split(":")
