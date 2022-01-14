@@ -12,13 +12,22 @@ app = FastAPI()
 
 def text_usage(response: MessagingResponse):
     response.message(
-        "Usage: <time/draw> <first name> <last name> <start time> <end time> <subtracted hours(lunch)> [<additional hours(drive time)>]\n\
-            Here is an example...")
+        "Usage: <time/draw> <first name> <last name> <start time> <end time> <subtracted hours(lunch)>\
+            [<additional hours(drive time)>]\nHere is an example...")
     response.message("Time Taylor Poulsen 11:46am 5:04pm 1.25 3.6")
 
 @app.get("/")
 def read_root():
     return {"PCC": "Poulsen Concrete Contractors Inc."}
+
+
+# @app.get("/addHours/{date}/{time}")
+# def add_hours(date, time):
+#     try:
+#         result = databaseAccess.add_hours(date, time)
+#     except:
+#         return f"Failed to add hours" 
+#     return json.dumps(result)
 
 
 @app.get("/getTimeCards/{start}/{end}")

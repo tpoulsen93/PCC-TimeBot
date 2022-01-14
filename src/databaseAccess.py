@@ -4,7 +4,7 @@ import datetime, os
 from datetime import timedelta
 
 from sqlalchemy import MetaData, Table, Column, String, Integer, Float, Date
-from sqlalchemy import create_engine, insert, text, update, delete, true, ForeignKey
+from sqlalchemy import create_engine, insert, text, ForeignKey
 
 
 
@@ -20,7 +20,8 @@ employees = Table(
     Column('last_name', String),
     Column('wage', Float),
     Column('phone', String, unique=True),
-    Column('email', String)
+    Column('email', String),
+    Column('supervisor', String) # <first> <last>
 )
 
 payroll = Table(
@@ -59,7 +60,7 @@ def submit_time(id, time, msg) -> str:
     else:
         stmt = text("UPDATE payroll SET time = :t, message = :m \
             WHERE id = :i AND date = :d")
-        result = f"Updated submission from {str(dupe)} to {str(time)}"
+        result = f"Updated submission from {str(dupe)} to {str(time)} hours"
     with engine.connect() as conn:
         conn.execute(stmt, t = time, m = msg, i = id, d = today)
     return result
@@ -89,8 +90,8 @@ def get_employee_name(id) -> str:
 # add a new employee to the table
 def add_employee(first, last, wage, email = "", phone = ""):
     stmt = insert(employees).values(
-        first_name = first,
-        last_name = last,
+        first_name = first.lower(),
+        last_name = last.lower(),
         wage = wage,
         phone = phone if phone != "" else None,
         email = email if email != "" else None
