@@ -1,6 +1,6 @@
 from twilio.rest import Client
 
-from sqlalchemy import create_engine, insert, text, ForeignKey
+from sqlalchemy import create_engine
 
 import sys, os
 
@@ -13,11 +13,9 @@ url = url.replace("postgres", "postgresql")
 engine = create_engine(url)
 
 result = get_employee_id("taylor", "poulsen")
-print(result)
-id = result.scalar()
-print(id)
+id = result[0]
+print(f"my id: {id}")
 
-result = get_employee_phone(id)
-print(result)
-print(result.scalar())
-
+result = get_employee_phone(id).scalar()
+#print(result.scalar())
+print(f"my phone: {result}")

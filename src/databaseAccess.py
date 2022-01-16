@@ -1,5 +1,5 @@
 from src.timeCardGeneration import buildTimeCards
-import os
+import sys, os
 
 from datetime import timedelta, datetime
 
@@ -111,7 +111,7 @@ def get_employee_name(id) -> str:
     return f"{first} {last}"
 
 
-def get_employee_phone(id):
+def get_employee_phone(id) -> str:
     stmt = text("SELECT phone FROM employees \
         WHERE id = :i")
     with engine.connect() as conn:
