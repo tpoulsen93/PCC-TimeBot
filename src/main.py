@@ -27,7 +27,7 @@ def add_hours(first, last, date, time):
         result = databaseAccess.add_hours(first, last, date, time)
     except:
         return f"Failed to add hours... yikes" 
-    return f"Submitted {time} hours on {date} for {first} {last}"
+    return result
 
 
 @app.get("/getTimeCards/{start}/{end}")
@@ -46,9 +46,7 @@ def update_employee(first, last, target, value) -> str:
         databaseAccess.update_employee(first, last, target, value)
     except:
         return "Something bad happened... Failed to update employee"
-    return f"Employee successfully updated:\n\
-                Name:   {first} {last}\n\
-                {target.title()}:   {value}"
+    return f"{first} {last} -> {target} was updated to {value}"
 
 
 @app.get("/addEmployee/{first}/{last}/{wage}/{email}/{phone}")
@@ -57,13 +55,7 @@ def add_employee(first, last, wage, email, phone) -> str:
         databaseAccess.add_employee(first, last, wage, email, phone)
     except:
         return "Something bad happened... Failed to add employee"
-    return {"employee added": "success",\
-                "first name" : first,\
-                "last name"  : last,\
-                "wage"       : wage,\
-                "email"      : email,\
-                "phone"      : phone
-            }
+    return f"{first} {last} was successfully added"
 
 
 @app.post("/sms")

@@ -58,8 +58,9 @@ def process_time(message: str) -> str:
 
     # send the submission to the supervisor and myself
     supervisor_id = databaseAccess.get_super_id(employee_id)
-    supervisor_phone = databaseAccess.get_employee_phone(supervisor_id)
-    tp_phone = databaseAccess.get_employee_phone('1')
+    supervisor_phone = databaseAccess.get_employee_phone(supervisor_id[0])
+    tp = databaseAccess.get_employee_id('taylor', 'poulsen')
+    tp_phone = databaseAccess.get_employee_phone(tp[0])
     twilio = os.environ['TWILIO_PHONE']
     client = Client(
         os.environ['TWILIO_ACCOUNT_SID'],
