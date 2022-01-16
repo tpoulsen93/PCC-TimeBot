@@ -63,10 +63,10 @@ def process_time(message: str) -> str:
     # supervisor_id = int(supervisor_id[0])
     # supervisor_phone = databaseAccess.get_employee_phone(supervisor_id)
 
-    # tp_id = databaseAccess.get_employee_id('taylor', 'poulsen')
-    # if not tp_id:
-    #     return "Error. TP not found..."
-    # tp_id = int(tp_id[0])
+    tp_id = databaseAccess.get_employee_id('taylor', 'poulsen')
+    if not tp_id:
+        return "Error. TP not found..."
+    tp_id = int(tp_id[0])
     # tp_phone = databaseAccess.get_employee_phone(tp_id)
 
     twilio = os.environ['TWILIO_PHONE']
@@ -83,7 +83,7 @@ def process_time(message: str) -> str:
     response2 = client.messages.create(
         from_=f"+1{twilio}",
         to=f"+12083500006",#{tp_phone}",
-        body=result
+        body=tp_id
     )
 
     print(response1.sid)
