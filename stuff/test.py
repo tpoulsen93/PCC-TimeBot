@@ -1,19 +1,23 @@
 from twilio.rest import Client
-import os
+
+from sqlalchemy import create_engine, insert, text, ForeignKey
+
+import sys, os
+
+sys.path.insert(0, '/Users/tpoulsen/Code/PCC-TimeBot')
+from src.databaseAccess import *
 
 
-client = Client(
-    os.environ['TWILIO_ACCOUNT_SID'],
-    os.environ['TWILIO_AUTH_TOKEN']
-)
+url = os.environ['DATABASE_URL']
+url = url.replace("postgres", "postgresql")
+engine = create_engine(url)
 
-twil = os.environ['TWILIO_PHONE']
-tp = os.environ['TP_PHONE']
+result = get_employee_id("taylor", "poulsen")
+print(result)
+id = result.scalar()
+print(id)
 
-client.messages.create(from_=f"+1{twil}",
-                       to=f"+1{tp}",
-                       body='Ahoy from Twilio!')
-
-
-
+result = get_employee_phone(id)
+print(result)
+print(result.scalar())
 

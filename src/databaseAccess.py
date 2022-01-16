@@ -111,12 +111,12 @@ def get_employee_name(id) -> str:
     return f"{first} {last}"
 
 
-def get_employee_phone(id) -> str:
+def get_employee_phone(id):
     stmt = text("SELECT phone FROM employees \
         WHERE id = :i")
     with engine.connect() as conn:
         result = conn.execute(stmt, i = id)
-    return str(result[0])
+    return result
 
 
 # add a new employee to the table
