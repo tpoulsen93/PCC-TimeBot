@@ -58,13 +58,19 @@ def process_time(message: str) -> str:
 
     # send the submission to the supervisor and myself
     supervisor_id = databaseAccess.get_super_id(employee_id)
-    supervisor_id = int(supervisor_id[0])
+    if not supervisor_id:
+        return "Error. Supervisor not found."
+    else:
+        supervisor_id = int(supervisor_id[0])
     supervisor_phone = databaseAccess.get_employee_phone(supervisor_id)
 
     tp_id = databaseAccess.get_employee_id('taylor', 'poulsen')
-    tp_id = int(tp_id[0])
+    if not tp_id:
+        return "Error. TP not found..."
+    else:
+        tp_id = int(tp_id[0])
     tp_phone = databaseAccess.get_employee_phone(tp_id)
-    
+
     twilio = os.environ['TWILIO_PHONE']
     client = Client(
         os.environ['TWILIO_ACCOUNT_SID'],
