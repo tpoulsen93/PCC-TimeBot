@@ -82,21 +82,21 @@ def add_time(first, last, date, time):
 
 
 # get the supervisor id of the employee
-def get_super_id(employee_id):
+def get_super_id(employee_id) -> int:
     stmt = text("SELECT supervisor_id FROM employees \
         WHERE id = :i")
     with engine.connect() as conn:
         result = conn.execute(stmt, i = employee_id)
-    return result
+    return result if not result else int(result.scalar())
 
 
 # return the id number of the employee if they exist
-def get_employee_id(first: str, last: str):
+def get_employee_id(first: str, last: str) -> int:
     stmt = text("SELECT id FROM employees \
         WHERE first_name = :f AND last_name = :l")
     with engine.connect() as conn:
-        result = conn.execute(stmt, f = first, l = last).first()
-    return result
+        result = conn.execute(stmt, f = first.lower(), l = last.lower()).first()
+    return result if not result else int(result[0])
 
 
 # return the first and last name of the employee associated with the id
@@ -126,7 +126,7 @@ def add_employee(first, last, wage, email = "", phone = ""):
         last_name = last.lower(),
         wage = wage,
         phone = phone if phone != "" else None,
-        email = email if email != "" else None
+        email = email.lower() if email != "" else None
     )
     with engine.connect() as conn:
         conn.execute(stmt)
