@@ -116,7 +116,7 @@ def get_employee_phone(id) -> str:
         WHERE id = :i")
     with engine.connect() as conn:
         result = conn.execute(stmt, i = id)
-    return result
+    return result if not result else result.scalar()
 
 
 # add a new employee to the table
