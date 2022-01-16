@@ -77,12 +77,12 @@ def process_time(message: str) -> str:
 
     response1 = client.messages.create(
         from_=f"+1{twilio}",
-        to=f"+12089821789"#{supervisor_phone}",
+        to=f"+12089821789",#{supervisor_phone}",
         body=result
     )
     response2 = client.messages.create(
         from_=f"+1{twilio}",
-        to=f"+12083500006"#{tp_phone}",
+        to=f"+12083500006",#{tp_phone}",
         body=result
     )
 
