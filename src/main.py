@@ -57,11 +57,13 @@ def add_employee(first, last, wage, email, phone) -> str:
         databaseAccess.add_employee(first, last, wage, email, phone)
     except:
         return "Something bad happened... Failed to add employee"
-    return f"Employee successfully added:\n\
-                Name:   {first} {last}\n\
-                Wage:   ${wage}/hr\n\
-                Email:  {email}\n\
-                Phone:  {phone}"
+    return {"employee added": "success",\
+                "first name" : first,\
+                "last name"  : last,\
+                "wage"       : wage,\
+                "email"      : email,\
+                "phone"      : phone
+            }
 
 
 @app.post("/sms")

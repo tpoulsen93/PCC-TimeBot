@@ -1,10 +1,18 @@
-from datetime import timedelta
-import datetime
-d = (datetime.datetime.today() + timedelta(hours=5)).date()
+from twilio.rest import Client
+import os
 
-print(datetime.datetime.today())
-print(d)
 
+client = Client(
+    os.environ['TWILIO_ACCOUNT_SID'],
+    os.environ['TWILIO_AUTH_TOKEN']
+)
+
+twil = os.environ['TWILIO_PHONE']
+tp = os.environ['TP_PHONE']
+
+client.messages.create(from_=f"+1{twil}",
+                       to=f"+1{tp}",
+                       body='Ahoy from Twilio!')
 
 
 

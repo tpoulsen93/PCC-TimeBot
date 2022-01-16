@@ -1,9 +1,12 @@
 import src.databaseAccess as databaseAccess
 from src.exceptions import *
-import datetime
+import datetime, sys, os
 
+from twilio.rest import Client
 from src.timeCalc import calculate_time
 from datetime import timedelta
+
+
 
 time_error = "Error. Time formatted incorrectly."
 
@@ -15,11 +18,12 @@ def process_time(message: str) -> str:
     if len(mess) > 7:
         return f"{time_error} Too many parameters."
 
+
     # get the employee id
-    employeeId = databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
-    if not employeeId:
+    employee_id = databaseAccess.get_employee_id(mess[1].lower(), mess[2].lower())
+    if not employee_id:
         return "Error. Employee not found."
-    employeeId = int(employeeId[0])
+    employee_id = int(employee_id[0])
 
     # get the start time, end time, break time, and extra time
     start = mess[3]
@@ -48,10 +52,36 @@ def process_time(message: str) -> str:
     # heroku uses utc time and we need mountain time so this is my hacky conversion
     today = (datetime.datetime.today() - timedelta(hours=7)).date()
 
-    # add the hours to the database and return the message to be texted back
-    submission = databaseAccess.submit_time(employeeId, time, message)
-    return f"{today}\n{submission} for {mess[1].title()} {mess[2].title()}"
+    # add the hours to the database
+    submission = databaseAccess.submit_time(employee_id, time, message)
+    result = f"{today}\n{submission} for {mess[1].title()} {mess[2].title()}"
 
+    # send the submission to the supervisor and myself
+    supervisor_id = databaseAccess.get_super_id(employee_id)
+    supervisor_phone = databaseAccess.get_employee_phone(supervisor_id)
+    tp_phone = databaseAccess.get_employee_phone('1')
+    twilio = os.environ['TWILIO_PHONE']
+    client = Client(
+        os.environ['TWILIO_ACCOUNT_SID'],
+        os.environ['TWILIO_AUTH_TOKEN']
+    )
+
+    response1 = client.messages.create(
+        from_=f"+1{twilio}",
+        to=f"+1{supervisor_phone}",
+        body=result
+    )
+    response2 = client.messages.create(
+        from_=f"+1{twilio}",
+        to=f"+1{tp_phone}",
+        body=result
+    )
+
+    print(response1.sid)
+    print(response2.sid)
+    sys.stdout.flush()
+
+    return result
 
 
 def process_message(message: str):

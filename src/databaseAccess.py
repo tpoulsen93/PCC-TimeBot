@@ -1,7 +1,7 @@
 from src.timeCardGeneration import buildTimeCards
-import datetime, os
+import os
 
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from sqlalchemy import MetaData, Table, Column, String, Integer, Float, Date
 from sqlalchemy import create_engine, insert, text, ForeignKey
@@ -21,7 +21,7 @@ employees = Table(
     Column('wage', Float),
     Column('phone', String, unique=True),
     Column('email', String),
-    Column('supervisor', String) # <first> <last>
+    Column('supervisor_id', Integer)
 )
 
 payroll = Table(
@@ -38,7 +38,7 @@ meta.create_all(engine)
 
 def duplicate_submission(id):
     # heroku uses utc time and we need mountain time so this is my hacky conversion
-    today = (datetime.datetime.today() - timedelta(hours=7)).date()
+    today = (datetime.today() - timedelta(hours=7)).date()
 
     stmt = text("SELECT time FROM payroll WHERE id = :i AND date = :d")
     with engine.connect() as conn:
@@ -51,7 +51,7 @@ def duplicate_submission(id):
 # submit hours for an employee
 def submit_time(id, time, msg) -> str:
     # heroku uses utc time and we need mountain time so this is my hacky conversion
-    today = (datetime.datetime.today() - timedelta(hours=7)).date()
+    today = (datetime.today() - timedelta(hours=7)).date()
 
     dupe = duplicate_submission(id)
     if not dupe:
@@ -68,7 +68,7 @@ def submit_time(id, time, msg) -> str:
 
 # add hours for an employee on specific date
 def add_time(first, last, date, time):
-    today = (datetime.datetime.today() - timedelta(hours=7)).date()
+    today = (datetime.today() - timedelta(hours=7)).date()
 
     id = get_employee_id(first, last)
     stmt = insert(payroll).values(
@@ -79,6 +79,16 @@ def add_time(first, last, date, time):
     )
     with engine.connect() as conn:
         conn.execute(stmt)
+
+
+# get the supervisor id of the employee
+def get_super_id(employee_id):
+    stmt = text("SELECT supervisor_id FROM employees \
+        WHERE id = :i")
+    with engine.connect() as conn:
+        result = conn.execute(stmt, i = employee_id)
+    return result
+
 
 # return the id number of the employee if they exist
 def get_employee_id(first: str, last: str):
@@ -99,6 +109,14 @@ def get_employee_name(id) -> str:
     first = result[0]
     last = result[1]
     return f"{first} {last}"
+
+
+def get_employee_phone(id) -> str:
+    stmt = text("SELECT phone FROM employees \
+        WHERE id = :i")
+    with engine.connect() as conn:
+        result = conn.execute(stmt, i = id)
+    return result[0]
 
 
 # add a new employee to the table
