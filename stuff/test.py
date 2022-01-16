@@ -19,3 +19,10 @@ print(f"my id: {id}")
 result = get_employee_phone(id).scalar()
 #print(result.scalar())
 print(f"my phone: {result}")
+
+
+supervisor_id = databaseAccess.get_super_id('1')
+if not supervisor_id:
+    return "Error. Supervisor not found."
+supervisor_id = int(supervisor_id[0])
+print(supervisor_id)
