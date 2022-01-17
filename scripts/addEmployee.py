@@ -5,7 +5,7 @@ import sys
 
 
 def print_usage():
-    print("Usage: ./addEmployee <first> <last> <wage> <email> <phone>")
+    print("Usage: ./addEmployee <first> <last> <super first> <super last> <wage> <email> <phone>")
     sys.exit()
 
 # check commandline arguments

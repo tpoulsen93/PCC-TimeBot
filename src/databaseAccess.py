@@ -119,11 +119,11 @@ def get_employee_phone(id) -> str:
     return result if not result else result.scalar()
 
 
-# add a new employee to the table
-def add_employee(first, last, wage, email = "", phone = ""):
+def add_employee(first, last, super_first, super_last, wage, email = "", phone = ""):
     stmt = insert(employees).values(
         first_name = first.lower(),
         last_name = last.lower(),
+        supervisor_id = get_employee_id(super_first, super_last),
         wage = wage,
         phone = phone if phone != "" else None,
         email = email.lower() if email != "" else None

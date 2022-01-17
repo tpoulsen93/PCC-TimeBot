@@ -1,6 +1,7 @@
 #!/bin/python3
 
 from datetime import date
+
 import requests
 import sys
 

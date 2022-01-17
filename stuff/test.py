@@ -1,5 +1,3 @@
-from twilio.rest import Client
-
 from sqlalchemy import create_engine
 
 import sys, os

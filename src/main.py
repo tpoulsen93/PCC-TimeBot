@@ -13,7 +13,7 @@ app = FastAPI()
 def text_usage(response: MessagingResponse):
     response.message(
         "Usage: <time/draw> <first name> <last name> <start time> <end time> <subtracted hours(lunch)>\
-            [<additional hours(drive time)>]\nHere is an example...")
+            [<additional hours(drive time)>]\nExample:")
     response.message("Time Taylor Poulsen 11:46am 5:04pm 1.25 3.6")
 
 @app.get("/")
@@ -49,10 +49,10 @@ def update_employee(first, last, target, value) -> str:
     return f"{first} {last} -> {target} was updated to {value}"
 
 
-@app.get("/addEmployee/{first}/{last}/{wage}/{email}/{phone}")
-def add_employee(first, last, wage, email, phone) -> str:
+@app.get("/addEmployee/{first}/{last}/{wage}/{email}/{phone}/{super_first}/{super_last}")
+def add_employee(first, last, super_first, super_last, wage, email, phone) -> str:
     try:
-        databaseAccess.add_employee(first, last, wage, email, phone)
+        databaseAccess.add_employee(first, last, super_first, super_last, wage, email, phone)
     except:
         return "Something bad happened... Failed to add employee"
     return f"{first} {last} was successfully added"
