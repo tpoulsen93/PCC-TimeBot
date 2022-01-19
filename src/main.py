@@ -52,10 +52,10 @@ def update_employee(first, last, target, value) -> str:
 @app.get("/addEmployee/{first}/{last}/{wage}/{email}/{phone}/{super_first}/{super_last}")
 def add_employee(first, last, super_first, super_last, wage, email, phone) -> str:
     try:
-        databaseAccess.add_employee(first, last, super_first, super_last, wage, email, phone)
+        result = databaseAccess.add_employee(first, last, wage, email, phone, super_first, super_last)
     except:
         return "Something bad happened... Failed to add employee"
-    return f"{first} {last} was successfully added"
+    return result
 
 
 @app.post("/sms")

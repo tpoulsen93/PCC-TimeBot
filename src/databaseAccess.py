@@ -1,10 +1,9 @@
-from src.timeCardGeneration import buildTimeCards
-import sys, os
+import os
 
 from datetime import timedelta, datetime
 
 from sqlalchemy import MetaData, Table, Column, String, Integer, Float, Date
-from sqlalchemy import create_engine, insert, text, ForeignKey
+from sqlalchemy import create_engine, insert, text, ForeignKey, TIMESTAMP
 
 
 
@@ -19,9 +18,10 @@ employees = Table(
     Column('first_name', String),
     Column('last_name', String),
     Column('wage', Float),
-    Column('phone', String, unique=True),
+    Column('phone', String),
     Column('email', String),
-    Column('supervisor_id', Integer)
+    Column('supervisor_id', Integer),
+    Column('timestamp', TIMESTAMP(timezone='america/boise'), nullable=False, default=datetime.now())
 )
 
 payroll = Table(
@@ -30,7 +30,8 @@ payroll = Table(
     Column('transaction_id', Integer, autoincrement=True, primary_key=True),
     Column('time', Float),
     Column('date', Date),
-    Column('message', String)
+    Column('message', String),
+    Column('timestamp', TIMESTAMP(timezone='america/boise'), nullable=False, default=datetime.now())
 )
 
 meta.create_all(engine)
@@ -119,17 +120,25 @@ def get_employee_phone(id) -> str:
     return result if not result else result.scalar()
 
 
-def add_employee(first, last, super_first, super_last, wage, email = "", phone = ""):
+def add_employee(first, last, wage, email = "", phone = "", super_first = "", super_last = ""):
+    if super_first != "" and super_last != "":
+        super_id = get_employee_id(super_first, super_last)
+        if not super_id:
+            return "Error. Failed to find supervisor id"
+    else:
+        super_id = None
+
     stmt = insert(employees).values(
         first_name = first.lower(),
         last_name = last.lower(),
-        supervisor_id = get_employee_id(super_first, super_last),
+        supervisor_id = super_id,
         wage = wage,
         phone = phone if phone != "" else None,
         email = email.lower() if email != "" else None
     )
     with engine.connect() as conn:
         conn.execute(stmt)
+    return f"{first.title()} {last.title()} was successfully added"
 
 
 # update wage, email, or phone for an employee
