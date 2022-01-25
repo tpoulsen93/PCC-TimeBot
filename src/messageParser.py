@@ -54,9 +54,12 @@ def process_time(message: str) -> str:
     # add the hours to the database
     submission = databaseAccess.submit_time(employee_id, time, message)
     result = f"{today}\n{submission} for {mess[1].title()} {mess[2].title()}"
-    twilioActions.confirmSubmission(employee_id, result)
-
-    return result
+    confirmation = twilioActions.confirmSubmission(employee_id, result)
+    
+    if confirmation:
+        return result
+    else:
+        return f"{result}\n{confirmation}"
 
 
 def process_message(message: str):
