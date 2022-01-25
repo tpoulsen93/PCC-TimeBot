@@ -1,8 +1,8 @@
 import src.databaseAccess as databaseAccess
+import src.twilioActions as twilioActions
 from src.exceptions import *
-import datetime, sys, os
+import datetime, os
 
-from twilio.rest import Client
 from src.timeCalc import calculate_time
 from datetime import timedelta
 
@@ -54,37 +54,7 @@ def process_time(message: str) -> str:
     # add the hours to the database
     submission = databaseAccess.submit_time(employee_id, time, message)
     result = f"{today}\n{submission} for {mess[1].title()} {mess[2].title()}"
-
-    # send the submission to the supervisor and myself
-    supervisor_id = databaseAccess.get_super_id(employee_id)
-    if supervisor_id != None:
-        supervisor_phone = databaseAccess.get_employee_phone(supervisor_id)
-        if not supervisor_phone:
-            return "Error. Supervisor phone not found."
-
-    tp_id = databaseAccess.get_employee_id('taylor', 'poulsen')
-    if not tp_id:
-        return "Error. TP not found..."
-    tp_phone = databaseAccess.get_employee_phone(tp_id)
-    if not tp_phone:
-        return "Error. TP phone not found."
-
-    twilio = os.environ['TWILIO_PHONE']
-    client = Client(
-        os.environ['TWILIO_ACCOUNT_SID'],
-        os.environ['TWILIO_AUTH_TOKEN']
-    )
-    client.messages.create(
-        from_=f"+1{twilio}",
-        to=f"+1{tp_phone}",
-        body=result
-    )
-    if supervisor_id:
-        client.messages.create(
-            from_=f"+1{twilio}",
-            to=f"+1{supervisor_phone}",
-            body=result
-        )
+    twilioActions.confirmSubmission(employee_id, result)
 
     return result
 

@@ -91,7 +91,7 @@ async def parse_message(request: Request, From: str = Form(...), Body: str = For
         else:
             response.message(msg)
 
-        print("Processed message:")
+        print(f"Processed message from {From}:")
         print(f"[{Body}]")
         print("Responded:")
         print(f"[{msg}]")

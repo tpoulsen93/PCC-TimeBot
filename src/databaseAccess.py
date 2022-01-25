@@ -157,6 +157,6 @@ def get_time_cards(start, end):
     with engine.connect() as conn:
         result = conn.execute(stmt, s = start, e = end)
 
-    return buildTimeCards(result, start, end)
+    # return buildTimeCards(result, start, end)
 
 
