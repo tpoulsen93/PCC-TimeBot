@@ -81,6 +81,8 @@ def add_time(first, last, date, time):
     with engine.connect() as conn:
         conn.execute(stmt)
 
+    return f"Submitted {time} hours for {first} {last} on {date}"
+
 
 # get the supervisor id of the employee
 def get_super_id(employee_id) -> int:

@@ -12,11 +12,11 @@ time =      input("Enter time:                      ")
 d = date.split('-')
 if len(d) != 3:
     print("Bad date.")
-if int(d[0]) < 2022 or int(d[0] > 9999):
+if int(d[0]) < 2022 or int(d[0]) > 9999:
     print("Bad date. <year>")
-if int(d[1]) < 1 or int(d[0] > 12):
+if int(d[1]) < 1 or int(d[0]) > 12:
     print("Bad date. <month>")
-if int(d[2]) < 1 or int(d[2] > 31):
+if int(d[2]) < 1 or int(d[2]) > 31:
     print("Bad date. <day>")
 
 # double check everything
