@@ -11,7 +11,7 @@ from datetime import timedelta
 time_error = "Error. Time formatted incorrectly."
 
 
-def process_time(message: str) -> str:
+def process_time(message: str, fro: str) -> str:
     mess = message.split()
     if len(mess) < 6:
         return f"{time_error} Too few parameters."
@@ -54,7 +54,7 @@ def process_time(message: str) -> str:
     # add the hours to the database
     submission = databaseAccess.submit_time(employee_id, time, message)
     result = f"{today}\n{submission} for {mess[1].title()} {mess[2].title()}"
-    confirmation = twilioActions.confirm_submission(employee_id, result)
+    confirmation = twilioActions.confirm_submission(employee_id, result, fro)
 
     if confirmation:
         return result
@@ -62,14 +62,14 @@ def process_time(message: str) -> str:
         return f"{result}\n{confirmation}"
 
 
-def process_message(message: str):
+def process_message(message: str, fro: str):
     mess = message.lower()
 
     # handle a time submission
     if mess.startswith("time") or mess.startswith("hours"):
         if "help" in mess:
             return "Help"
-        return process_time(message)
+        return process_time(message, fro)
 
     # ignore the message, it isn't meant for us
     else:

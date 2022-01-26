@@ -70,7 +70,7 @@ async def parse_message(request: Request, From: str = Form(...), Body: str = For
     # process the message
     response = MessagingResponse()     
     try:
-        msg = messageParser.process_message(Body)
+        msg = messageParser.process_message(Body, From)
     except Exception as e:
         response.message("Encountered an unexpected error. Check your format and try again.")
         print("Encountered unexpected error in message:")

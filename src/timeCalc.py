@@ -55,6 +55,7 @@ def build_time_delta(time: str) -> timedelta:
 
     return timedelta(hours=hours, minutes=minutes)
 
+
 # calculate hours for the day and return them
 def calculate_time(start: str, end: str, less: str, more: str) -> float:
     # build clock-in and clock-out time
