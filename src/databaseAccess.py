@@ -145,10 +145,10 @@ def add_employee(first, last, wage, email = "", phone = "", super_first = "", su
 # update wage, email, or phone for an employee
 def update_employee(first, last, target, value):
     id = get_employee_id(first, last)
-    stmt = text(f"UPDATE employees SET {target} = {value} WHERE id = {id}")
+    stmt = text(f"UPDATE employees SET {target} = :v WHERE id = :i")
     with engine.connect() as conn:
-        conn.execute(stmt)#, t = target, v = value, i = id)
-    return f"{target} was changed to {value} for {first.title()} {last.title()}"
+        conn.execute(stmt, v = value, i = id)
+    return f"{first.title()} {last.title()}'s {target} was changed to {value}"
 
 
 # get all the information for the indicated dates from the database and send them

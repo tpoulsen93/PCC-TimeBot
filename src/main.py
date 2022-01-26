@@ -21,43 +21,6 @@ def read_root():
     return {"PCC": "Poulsen Concrete Contractors Inc."}
 
 
-@app.get("/addHours/{first}/{last}/{date}/{time}")
-def add_hours(first, last, date, time):
-    try:
-        result = databaseAccess.add_hours(first, last, date, time)
-    except:
-        return f"Failed to add hours... yikes" 
-    return result
-
-
-@app.get("/getTimeCards/{start}/{end}")
-def get_time_cards(start, end):
-    try:
-        result = databaseAccess.get_time_cards(start, end)
-    except:
-        return f"Failed to get time cards... whoopsies :("
-    return json.dumps(result)
-
-
-
-@app.get("/updateEmployee/{first}/{last}/{target}/{value}")
-def update_employee(first, last, target, value) -> str:
-    try:
-        databaseAccess.update_employee(first, last, target, value)
-    except:
-        return "Something bad happened... Failed to update employee"
-    return f"{first} {last} -> {target} was updated to {value}"
-
-
-@app.get("/addEmployee/{first}/{last}/{wage}/{email}/{phone}/{super_first}/{super_last}")
-def add_employee(first, last, super_first, super_last, wage, email, phone) -> str:
-    try:
-        result = databaseAccess.add_employee(first, last, wage, email, phone, super_first, super_last)
-    except:
-        return "Something bad happened... Failed to add employee"
-    return result
-
-
 @app.post("/sms")
 async def parse_message(request: Request, From: str = Form(...), Body: str = Form(...)):
     # make sure the request is from Twillio not a rando

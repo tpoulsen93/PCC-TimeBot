@@ -19,7 +19,8 @@ print(f"email:      {email}")
 print(f"phone:      {phone}")
 print(f"supervisor: {s_first.title()} {s_last.title()}")
 
-good = input("Submit? (y/n)   ")
+good = input("\nSubmit? (y/n)   ")
+print()
 if good.startswith("y"):
     print(da.add_employee(first, last, wage, email, phone, s_first, s_last))
 else:

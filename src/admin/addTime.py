@@ -13,7 +13,8 @@ print(f"name:   {first.title()} {last.title()}")
 print(f"date:   {date}")
 print(f"hours:  {time}")
 
-good = input("Submit? (y/n)   ")
+good = input("\nSubmit? (y/n)   ")
+print()
 if good.startswith("y"):
     print(da.add_time(first, last, date, time))
 else:

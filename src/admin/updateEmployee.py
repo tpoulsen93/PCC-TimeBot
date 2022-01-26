@@ -13,7 +13,8 @@ print(f"name:   {first.title()} {last.title()}")
 print(f"target: {target}")
 print(f"value:  {value}")
 
-good = input("Submit? (y/n)   ")
+good = input("\nSubmit? (y/n)   ")
+print()
 if good.startswith("y"):
     print(da.update_employee(first, last, target, value))
 else:
