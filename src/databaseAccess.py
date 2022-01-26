@@ -80,7 +80,6 @@ def add_time(first, last, date, time):
     )
     with engine.connect() as conn:
         conn.execute(stmt)
-
     return f"Submitted {time} hours for {first} {last} on {date}"
 
 
@@ -146,9 +145,10 @@ def add_employee(first, last, wage, email = "", phone = "", super_first = "", su
 # update wage, email, or phone for an employee
 def update_employee(first, last, target, value):
     id = get_employee_id(first, last)
-    stmt = text("UPDATE employees SET :t = :v WHERE id = :i")
+    stmt = text(f"UPDATE employees SET {target} = {value} WHERE id = {id}")
     with engine.connect() as conn:
-        conn.execute(stmt, t = target, v = value, i = id)
+        conn.execute(stmt)#, t = target, v = value, i = id)
+    return f"{target} was changed to {value} for {first.title()} {last.title()}"
 
 
 # get all the information for the indicated dates from the database and send them
