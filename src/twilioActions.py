@@ -27,7 +27,7 @@ def send_text(id: int, msg: str) -> bool:
     return True
 
 # send confirmation texts of a submission to myself, the supervisor, and the recipient
-def confirm_submission(employee_id: int, msg: str):
+def confirm_submission(employee_id: int, msg: str, fro: str):
     supervisor_id = databaseAccess.get_super_id(employee_id)
     if supervisor_id != None:
         supervisor_phone = databaseAccess.get_employee_phone(supervisor_id)
