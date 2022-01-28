@@ -57,11 +57,11 @@ def submit_time(id, time, msg) -> str:
     dupe = duplicate_submission(id)
     if not dupe:
         stmt = insert(payroll).values(id = id, time = time, date = today, message = msg)
-        result = f"Submitted {str(time)} hours"
+        result = f"submitted {str(time)} hours"
     else:
         stmt = text("UPDATE payroll SET time = :t, message = :m \
             WHERE id = :i AND date = :d")
-        result = f"Updated submission from {str(dupe)} to {str(time)} hours"
+        result = f"updated submission from {str(dupe)} to {str(time)} hours"
     with engine.connect() as conn:
         conn.execute(stmt, t = time, m = msg, i = id, d = today)
     return result
