@@ -6,15 +6,14 @@ from fastapi import FastAPI, Form, Response, Request, HTTPException
 from twilio.twiml.messaging_response import MessagingResponse
 from twilio.request_validator import RequestValidator  
 
-
 app = FastAPI()
-
 
 def text_usage(response: MessagingResponse):
     response.message(
         "Usage: <time/draw> <first name> <last name> <start time> <end time> <subtracted hours(lunch)>\
             [<additional hours(drive time)>]\nExample:")
     response.message("Time Taylor Poulsen 11:46am 5:04pm 1.25 3.6")
+
 
 @app.get("/")
 def read_root():
@@ -23,7 +22,7 @@ def read_root():
 
 @app.post("/sms")
 async def parse_message(request: Request, From: str = Form(...), Body: str = Form(...)):
-    # make sure the request is from Twillio not a rando
+    # make sure the request is from Twilio not a rando
     validator = RequestValidator(os.environ["TWILIO_AUTH_TOKEN"])
     form_ = await request.form()
     if not validator.validate(str(request.url), form_, request.headers.get("X-Twilio-Signature", "")):
@@ -43,7 +42,7 @@ async def parse_message(request: Request, From: str = Form(...), Body: str = For
         return Response(content=str(response), media_type="application/xml")
 
     if not msg:
-        print("Ignored message:")
+        print(f"Ignored message from {From}:")
         print(f"[{Body}]")
     else:
         if msg.startswith("Help"):
