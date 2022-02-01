@@ -155,9 +155,10 @@ def update_employee(first, last, target, value):
 # to the parser to build the json object of time cards
 def get_time_cards(start, end):
     stmt = text("SELECT id, time, date FROM payroll \
-        WHERE date >= :s AND date <= :e GROUP BY id ORDER BY date")
+        WHERE date >= :s::date AND date <= :e::date GROUP BY id ORDER BY date")
     with engine.connect() as conn:
         result = conn.execute(stmt, s = start, e = end)
+    return result
 
     # return buildTimeCards(result, start, end)
 

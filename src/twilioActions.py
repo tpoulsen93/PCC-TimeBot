@@ -28,6 +28,16 @@ def send_text(id: int, msg: str) -> bool:
 
 # send confirmation texts of a submission to myself, the supervisor, and the recipient
 def confirm_submission(employee_id: int, msg: str, fro: str):
+    # text confirmation to owner
+    # need to change this later to text multiple admins...
+    owner_id = databaseAccess.get_employee_id('jr', 'poulsen')
+    if not owner_id:
+        return "Error. Owner not found..."
+    owner_phone = databaseAccess.get_employee_phone(owner_id)
+    if not owner_phone:
+        return "Error. Owner phone not found."
+    send_text(owner_id, msg)
+
     # text confirmation to supervisor
     supervisor_id = databaseAccess.get_super_id(employee_id)
     if not supervisor_id:
