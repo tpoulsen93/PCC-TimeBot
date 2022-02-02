@@ -21,7 +21,7 @@ employees = Table(
     Column('phone', String),
     Column('email', String),
     Column('supervisor_id', Integer),
-    Column('timestamp', TIMESTAMP(timezone='america/boise'), nullable=False, default=datetime.now())
+    Column('utc_timestamp', TIMESTAMP(timezone='america/boise'), nullable=False, default=datetime.now())
 )
 
 payroll = Table(
@@ -31,7 +31,7 @@ payroll = Table(
     Column('time', Float),
     Column('date', Date),
     Column('message', String),
-    Column('timestamp', TIMESTAMP(timezone='america/boise'), nullable=False, default=datetime.now())
+    Column('utc_timestamp', TIMESTAMP(timezone='america/boise'), nullable=False, default=datetime.now())
 )
 
 meta.create_all(engine)
@@ -121,6 +121,21 @@ def get_employee_phone(id) -> str:
     return result if not result else result.scalar()
 
 
+def get_employee_email(id) -> str:
+    stmt = text("SELECT email FROM employees \
+        WHERE id = :i")
+    with engine.connect() as conn:
+        result = conn.execute(stmt, i = id)
+    return result if not result else result.scalar()
+
+
+def get_employee(id):
+    stmt = text("SELECT * FROM employees WHERE id = :i")
+    with engine.connect() as conn:
+        result = conn.execute(stmt, i = id)
+    return result
+
+
 def add_employee(first, last, wage, email = "", phone = "", super_first = "", super_last = ""):
     if super_first != "" and super_last != "":
         super_id = get_employee_id(super_first, super_last)
@@ -154,10 +169,10 @@ def update_employee(first, last, target, value):
 # get all the information for the indicated dates from the database and send them
 # to the parser to build the json object of time cards
 def get_time_cards(start, end):
-    stmt = text("SELECT id, time, date FROM payroll \
-        WHERE date >= :s::date AND date <= :e::date GROUP BY id ORDER BY date")
+    stmt = text(f"SELECT id, time, date FROM payroll \
+        WHERE date >= '{start}'::date AND date <= '{end}'::date ORDER BY id")
     with engine.connect() as conn:
-        result = conn.execute(stmt, s = start, e = end)
+        result = conn.execute(stmt)
     return result
 
     # return buildTimeCards(result, start, end)

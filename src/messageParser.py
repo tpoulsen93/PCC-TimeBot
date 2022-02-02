@@ -1,5 +1,5 @@
-import src.databaseAccess as databaseAccess
-import src.twilioActions as twilioActions
+import src.databaseAccess as da
+import src.twilioActions as ta
 from src.exceptions import *
 import datetime, os
 
@@ -20,7 +20,7 @@ def process_time(message: str, fro: str) -> str:
 
 
     # get the employee id
-    employee_id = databaseAccess.get_employee_id(mess[1], mess[2])
+    employee_id = da.get_employee_id(mess[1], mess[2])
     if not employee_id:
         return "Error. Employee not found."
 
@@ -52,9 +52,9 @@ def process_time(message: str, fro: str) -> str:
     today = (datetime.datetime.today() - timedelta(hours=7)).date()
 
     # add the hours to the database
-    submission = databaseAccess.submit_time(employee_id, time, message)
+    submission = da.submit_time(employee_id, time, message)
     result = f"{today}\n{mess[1].title()} {mess[2].title()} {submission}"
-    confirmation = twilioActions.confirm_submission(employee_id, result, fro)
+    confirmation = ta.confirm_submission(employee_id, result, fro)
 
     if confirmation:
         return result
