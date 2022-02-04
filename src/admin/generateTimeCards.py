@@ -1,3 +1,5 @@
+#!/bin/python3
+
 from email import encoders
 from email.header import Header
 from email.mime.base import MIMEBase
@@ -70,7 +72,8 @@ if result:
                 smtp.send_message(msg)
             except Exception as e:
                 print(f"Failed to send timecard to {t.name}")
-                print(e.with_traceback)
+                print(f"\t{e.__cause__}")
+                print(f"\t{e.with_traceback}")
 
             # clean up old headers before next iteration
             del msg['Subject']
@@ -99,3 +102,6 @@ if result:
         body += f"\nTotal Cost  -->  {cost_sum}"
 
         smtp.sendmail(fro, to, body)
+
+#print everything to the logs
+sys.stdout.flush()
