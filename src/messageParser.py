@@ -1,8 +1,7 @@
 import src.databaseAccess as da
 import src.twilioActions as ta
 from src.exceptions import *
-import datetime, os
-
+import datetime
 from src.timeCalc import calculate_time
 from datetime import timedelta
 

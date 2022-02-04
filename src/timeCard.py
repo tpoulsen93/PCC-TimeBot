@@ -2,22 +2,11 @@ from datetime import date, datetime, timedelta
 import databaseAccess as da
 
 
-class Day:
-    def __init__(self, day: date):
-        self.date = day
-        self.weekday = day.strftime('%A')[:3]
-        self.hours = 0
-
-    def to_string(self):
-        return "{:^10s} | {:^4s}| {:^5s}\n".format(str(self.date), self.weekday, str(self.hours))
-
-
-
 
 class TimeCard:
     def __init__(self, id, start_date, end_date):
         self.id = id
-        self.days = []
+        self.days = {}
         self.total_hours = 0
 
         start = datetime.strptime(start_date, '%Y-%m-%d').date()
@@ -26,7 +15,7 @@ class TimeCard:
 
         current = start
         while current <= end:
-            self.days.append(Day(current))
+            self.days[str(current)] = 0
             current += timedelta(days=1)
 
         employee = da.get_employee(id)
@@ -38,10 +27,16 @@ class TimeCard:
 
 
     def add_hours(self, date: str, hours: float):
-        for d in self.days:
-            if str(d.date) == date:
-                d.hours = hours
-                self.total_hours += hours
+        self.days[date] = hours
+        self.total_hours += hours
+
+
+    def build_day_line(self, date: str) -> str:
+        return "{:^10s} | {:^4s}| {:^5s}\n".format(
+            date,
+            datetime.strptime(date, '%Y-%m-%d').strftime('%A')[:3],
+            str(self.days[date])
+        )
 
 
     def to_string(self) -> str:
@@ -49,13 +44,13 @@ class TimeCard:
         result +=  "{:^11s}|{:^5s}|{:>6s}\n".format("Date", "Day", "Hours")
         result += "{:-^11}+{:-^5}+{:->6}\n".format("","","")
 
-        for d in self.days:
-            result += d.to_string()
+        for d in self.days.keys():
+            result += self.build_day_line(d)
 
-        result += f"\n\nWage:  ${self.wage}/hr\n"
-        result += f"Total hours:  {self.total_hours}\n"
+        result += f"\n\nWage:  ${round(self.wage, 2)}/hr\n"
+        result += f"Total hours:  {round(self.total_hours, 2)}\n"
         result +=  "Gross pay:  ${:0,.2f}\n".format(self.wage * self.total_hours)
-        result += f"Payday:  {self.payday}"
+        result += f"Payday:  {self.payday}\n"
 
         return result
 

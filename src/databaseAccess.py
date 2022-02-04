@@ -1,10 +1,7 @@
-import os
-
-from datetime import timedelta, datetime
-
 from sqlalchemy import MetaData, Table, Column, String, Integer, Float, Date
 from sqlalchemy import create_engine, insert, text, ForeignKey, TIMESTAMP
-
+from datetime import timedelta, datetime
+import os
 
 
 url = os.environ['DATABASE_URL']
@@ -21,7 +18,7 @@ employees = Table(
     Column('phone', String),
     Column('email', String),
     Column('supervisor_id', Integer),
-    Column('utc_timestamp', TIMESTAMP(timezone='america/boise'), nullable=False, default=datetime.now())
+    Column('timestamp', TIMESTAMP(timezone='america/boise'), nullable=False, default=datetime.now())
 )
 
 payroll = Table(
@@ -31,7 +28,7 @@ payroll = Table(
     Column('time', Float),
     Column('date', Date),
     Column('message', String),
-    Column('utc_timestamp', TIMESTAMP(timezone='america/boise'), nullable=False, default=datetime.now())
+    Column('timestamp', TIMESTAMP(timezone='america/boise'), nullable=False, default=datetime.now())
 )
 
 meta.create_all(engine)

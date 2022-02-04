@@ -1,9 +1,6 @@
-import os
-
 import src.databaseAccess as databaseAccess
-
 from twilio.rest import Client
-
+import os
 
 
 # send the submission to the supervisor and myself
