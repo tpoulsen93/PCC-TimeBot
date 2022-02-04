@@ -2,6 +2,7 @@
 
 # list of all possible actions whose index is a primary key for the scripts
 actions=(
+    "Send time cards"
     "Add a new employee"
     "Update an existing employee"
     "Make a new time submission"
@@ -9,6 +10,7 @@ actions=(
 
 # list of all the scripts that correspond to the actions above
 scripts=(
+    "admin.sendTimeCards"
     "admin.addEmployee"
     "admin.updateEmployee"
     "admin.addTime"
@@ -24,10 +26,11 @@ do
 done
 
 echo
-read -p "Enter the number of the action to execute -->  " i
+read -n 1 -p "Enter the number of the action to execute -->  " i
 
 # change directory attempt to run the selected script
 if [[ $i -ge 0 && $i -lt ${#actions[@]} ]]; then
+    echo
     echo "Initializing..."; echo
     cd src; python3 -m ${scripts[$i]}
 else

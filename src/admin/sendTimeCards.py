@@ -1,32 +1,34 @@
-#!/bin/python3
-
 from email import encoders
 from email.header import Header
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
-from sqlalchemy import false
 import databaseAccess as da
 import timeCard as tc
 import smtplib, sys, os
 
+# def print_usage():
+#     print("Usage: generateTimeCards.py <period start date> <period end date>")
+#     print("Date format: YYYY-MM-DD")
+#     sys.exit()
 
+# # check the commandline arguments
+# if len(sys.argv) != 3:
+#     print_usage()
 
-def print_usage():
-    print("Usage: generateTimeCards.py <period start date> <period end date>")
-    print("Date format: YYYY-MM-DD")
-    sys.exit()
+# # get arguments from commandline
+# start = sys.argv[1]
+# end = sys.argv[2]
 
-# check the commandline arguments
-if len(sys.argv) != 3:
-    print_usage()
+# ask for necessary inputs
+print("Date format:  YYYY-MM-DD")
+start = input("Enter pay period start date:  ")
+end   = input("Enter pay period end date:    ")
 
-start = sys.argv[1]
-end = sys.argv[2]
-payday = false
+payday = False
 timecards = {}
 
 # get all the rows from the database between the start and end dates
-print(f"Getting all hours from {start} to {end}")
+print(f"\nGetting all hours submitted between {start} and {end}...")
 result = da.get_time_cards(start, end)
 if result:
     for r in result:
@@ -49,7 +51,7 @@ if result:
             print(f"Sending time card to {t.name}...")
 
             # grab the payday off the first timecard
-            if payday == false:
+            if not payday:
                 payday = t.payday
 
             msg['Subject'] = f"Time Card for payday: {payday}"
@@ -104,4 +106,5 @@ if result:
         smtp.sendmail(fro, to, body)
 
 #print everything to the logs
+print("Mission accomplished")
 sys.stdout.flush()
