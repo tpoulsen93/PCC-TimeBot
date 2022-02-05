@@ -88,13 +88,10 @@ def get_employee(id):
     return result
 
 
-def duplicate_submission(id):
-    # heroku uses utc time and we need mountain time so this is my hacky conversion
-    today = (datetime.today() - timedelta(hours=7)).date()
-
+def duplicate_submission(id, date):
     stmt = text("SELECT time FROM payroll WHERE id = :i AND date = :d")
     with engine.connect() as conn:
-        result = conn.execute(stmt, i = id, d = today).first()
+        result = conn.execute(stmt, i = id, d = date).first()
     if not result:
         return False
     return result[0]
@@ -105,7 +102,7 @@ def submit_time(id, time, msg) -> str:
     # heroku uses utc time and we need mountain time so this is my hacky conversion
     today = (datetime.today() - timedelta(hours=7)).date()
 
-    dupe = duplicate_submission(id)
+    dupe = duplicate_submission(id, today)
     if not dupe:
         stmt = insert(payroll).values(id = id, time = time, date = today, message = msg)
         result = f"submitted {str(time)} hours"
@@ -123,7 +120,7 @@ def add_time(first, last, date, time):
     today = (datetime.today() - timedelta(hours=7)).date()
 
     id = get_employee_id(first, last)
-    dupe = duplicate_submission(id)
+    dupe = duplicate_submission(id, date)
     if not dupe:
         stmt = insert(payroll).values(
             id = id,
