@@ -54,7 +54,7 @@ def process_time(message: str, fro: str) -> str:
     submission = da.submit_time(employee_id, time, message)
     if more == "":
         more = 0
-    result =  f"{today}\n{mess[1].title()} {mess[2].title()} {submission}"
+    result =  f"{today}\n{mess[1].title()} {mess[2].title()} {submission}\n"
     result += f"Subtracted hours: {less}\nAdded hours: {more}"
     confirmation = ta.confirm_submission(employee_id, result, fro)
 
