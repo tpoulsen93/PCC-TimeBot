@@ -27,7 +27,7 @@ class TimeCard:
 
 
     def add_hours(self, date: str, hours: float):
-        self.days[date] = hours
+        self.days[date] = round(hours, 2)
         self.total_hours += hours
 
 
@@ -35,7 +35,7 @@ class TimeCard:
         return "{:^10s} | {:^4s}| {:^5s}\n".format(
             date,
             datetime.strptime(date, '%Y-%m-%d').strftime('%A')[:3],
-            str(self.days[date])
+            str(round(self.days[date], 2))
         )
 
 

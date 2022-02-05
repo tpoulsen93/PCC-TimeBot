@@ -98,7 +98,7 @@ if result:
         for t in timecards.values():
             hours_sum += t.total_hours
             cost_sum += t.total_hours * t.wage
-            body += f"{t.name}  -->  {t.total_hours}\n"
+            body += f"{t.name}  -->  {round(t.total_hours, 2)}\n"
             
         body += f"\nTotal Hours  -->  {hours_sum}"
         body += f"\nTotal Cost  -->  {cost_sum}"
