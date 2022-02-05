@@ -72,7 +72,7 @@ def calculate_time(start: str, end: str, less: str, more: str) -> float:
         raise LunchException
 
     try:
-        add = float(more) if more != "" else 0
+        add = float(more)
     except:
         raise ExtraException
 

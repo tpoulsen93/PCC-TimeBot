@@ -27,7 +27,7 @@ def process_time(message: str, fro: str) -> str:
     start = mess[3]
     end = mess[4]
     less = mess[5]
-    more = mess[6] if len(mess) == 7 else ""
+    more = mess[6] if len(mess) == 7 else "0"
 
     # calculate the hours for the day or return an error message
     try:
@@ -52,7 +52,10 @@ def process_time(message: str, fro: str) -> str:
 
     # add the hours to the database
     submission = da.submit_time(employee_id, time, message)
-    result = f"{today}\n{mess[1].title()} {mess[2].title()} {submission}"
+    if more == "":
+        more = 0
+    result =  f"{today}\n{mess[1].title()} {mess[2].title()} {submission}"
+    result += f"Subtracted hours: {less}\nAdded hours: {more}"
     confirmation = ta.confirm_submission(employee_id, result, fro)
 
     if confirmation:
