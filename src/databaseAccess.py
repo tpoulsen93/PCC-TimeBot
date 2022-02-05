@@ -34,51 +34,6 @@ payroll = Table(
 meta.create_all(engine)
 
 
-def duplicate_submission(id):
-    # heroku uses utc time and we need mountain time so this is my hacky conversion
-    today = (datetime.today() - timedelta(hours=7)).date()
-
-    stmt = text("SELECT time FROM payroll WHERE id = :i AND date = :d")
-    with engine.connect() as conn:
-        result = conn.execute(stmt, i = id, d = today).first()
-    if not result:
-        return False
-    return result[0]
-
-
-# submit hours for an employee
-def submit_time(id, time, msg) -> str:
-    # heroku uses utc time and we need mountain time so this is my hacky conversion
-    today = (datetime.today() - timedelta(hours=7)).date()
-
-    dupe = duplicate_submission(id)
-    if not dupe:
-        stmt = insert(payroll).values(id = id, time = time, date = today, message = msg)
-        result = f"submitted {str(time)} hours"
-    else:
-        stmt = text("UPDATE payroll SET time = :t, message = :m \
-            WHERE id = :i AND date = :d")
-        result = f"updated submission from {str(dupe)} to {str(time)} hours"
-    with engine.connect() as conn:
-        conn.execute(stmt, t = time, m = msg, i = id, d = today)
-    return result
-    
-
-# add hours for an employee on specific date
-def add_time(first, last, date, time):
-    today = (datetime.today() - timedelta(hours=7)).date()
-
-    id = get_employee_id(first, last)
-    stmt = insert(payroll).values(
-        id = id,
-        time = time,
-        date = date,
-        message = f"Added manually on {today}"
-    )
-    with engine.connect() as conn:
-        conn.execute(stmt)
-    return f"Submitted {time} hours for {first} {last} on {date}"
-
 
 # get the supervisor id of the employee
 def get_super_id(employee_id) -> int:
@@ -133,6 +88,60 @@ def get_employee(id):
     return result
 
 
+def duplicate_submission(id):
+    # heroku uses utc time and we need mountain time so this is my hacky conversion
+    today = (datetime.today() - timedelta(hours=7)).date()
+
+    stmt = text("SELECT time FROM payroll WHERE id = :i AND date = :d")
+    with engine.connect() as conn:
+        result = conn.execute(stmt, i = id, d = today).first()
+    if not result:
+        return False
+    return result[0]
+
+
+# submit hours for an employee
+def submit_time(id, time, msg) -> str:
+    # heroku uses utc time and we need mountain time so this is my hacky conversion
+    today = (datetime.today() - timedelta(hours=7)).date()
+
+    dupe = duplicate_submission(id)
+    if not dupe:
+        stmt = insert(payroll).values(id = id, time = time, date = today, message = msg)
+        result = f"submitted {str(time)} hours"
+    else:
+        stmt = text("UPDATE payroll SET time = :t, message = :m \
+            WHERE id = :i AND date = :d")
+        result = f"updated submission from {str(dupe)} to {str(time)} hours"
+    with engine.connect() as conn:
+        conn.execute(stmt, t = time, m = msg, i = id, d = today)
+    return result
+    
+
+# add hours for an employee on specific date
+def add_time(first, last, date, time):
+    today = (datetime.today() - timedelta(hours=7)).date()
+
+    id = get_employee_id(first, last)
+    dupe = duplicate_submission(id)
+    if not dupe:
+        stmt = insert(payroll).values(
+            id = id,
+            time = time,
+            date = date,
+            message = f"Added manually on {today}"
+        )
+        result = f"Submitted {time} hours for {first.title()} {last.title()} on {date}"
+    else:
+        stmt = text("UPDATE payroll SET time = :t, message = :m \
+            WHERE id = :i AND date = :d")
+        result = f"Updated submission for {first.title()} {last.title()} from {str(dupe)} to {time} hours on {date}"
+        msg = f"Updated manually on {today}"
+    with engine.connect() as conn:
+        conn.execute(stmt, t = time, m = msg, i = id, d = date)
+    return result
+
+
 def add_employee(first, last, wage, email = "", phone = "", super_first = "", super_last = ""):
     if super_first != "" and super_last != "":
         super_id = get_employee_id(super_first, super_last)
@@ -171,7 +180,4 @@ def get_time_cards(start, end):
     with engine.connect() as conn:
         result = conn.execute(stmt)
     return result
-
-    # return buildTimeCards(result, start, end)
-
 
