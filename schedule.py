@@ -1,6 +1,12 @@
-from datetime import datetime as d
+import smtplib, os
 
-f = open("bob.txt", "a")
-f.write(str(d.now()))
-f.close()
+with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+    smtp.login(os.environ['SMTP_USERNAME'], os.environ['SMTP_PASSWORD'])
+    fro = os.environ['SMTP_USERNAME']
+    to = "t-poulsen@hotmail.com"
 
+    body =  f"From: TimeBot <poulsent.23@gmail.com>"
+        
+    body += f"\n\n hiiiiiii"
+
+    smtp.sendmail(fro, to, body)
