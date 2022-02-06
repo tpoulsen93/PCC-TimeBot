@@ -37,22 +37,22 @@ if result:
         else:
             timecards[r.id] = tc.TimeCard(r.id, start, end)
             timecards[r.id].add_hours(str(r.date), r.time)
+            # grab the payday off the first timecard
+            if not payday:
+                payday = timecards[r.id].payday
+
 
     # setup smtp to send emails
     print("Connecting to SMTP server...")
-    msg = MIMEMultipart()
-    msg['From'] = f"{Header('TimeBot').encode()} <{os.environ['SMTP_USERNAME']}>"
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
         smtp.login(os.environ['SMTP_USERNAME'], os.environ['SMTP_PASSWORD'])
 
         # loop through the timecards and send them to their recipients
         tmpPath = './timeCard.txt'
         for t in timecards.values():
+            msg = MIMEMultipart()
+            msg['From'] = f"{Header('TimeBot').encode()} <{os.environ['SMTP_USERNAME']}>"
             print(f"Sending time card to {t.name}...")
-
-            # grab the payday off the first timecard
-            if not payday:
-                payday = t.payday
 
             msg['Subject'] = f"Time Card for payday: {payday}"
             msg['To'] = t.email
@@ -77,9 +77,8 @@ if result:
                 print(f"\t{e.__cause__}")
                 print(f"\t{e.with_traceback}")
 
-            # clean up old headers before next iteration
-            del msg['Subject']
-            del msg['To']
+            # clean up the old message before next iteration
+            del msg
             f.close()
 
         # send all the results to TP for payroll submission

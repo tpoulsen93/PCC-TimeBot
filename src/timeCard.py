@@ -35,7 +35,7 @@ class TimeCard:
         return "{:^10s} | {:^4s}| {:^5s}\n".format(
             date,
             datetime.strptime(date, '%Y-%m-%d').strftime('%A')[:3],
-            str(round(self.days[date], 2))
+            f"{round(self.days[date], 2):g}"
         )
 
 
