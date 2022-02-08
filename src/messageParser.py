@@ -54,8 +54,11 @@ def process_time(message: str, fro: str) -> str:
     submission = da.submit_time(employee_id, time, message)
     if more == "":
         more = 0
-    result =  f"{today}\n{mess[1].title()} {mess[2].title()} {submission}\n"
-    result += f"Lunch hours: {less}\nExtra hours: {more}"
+    result =  f"{today}\n"
+    result += f"{mess[1].title()} {mess[2].title()}\n"
+    result += f"{submission}\n"
+    result += f"Lunch hours: {less}\n"
+    result += f"Extra hours: {more}"
     confirmation = ta.confirm_submission(employee_id, result, fro)
 
     if confirmation:

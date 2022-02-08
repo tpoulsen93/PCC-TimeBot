@@ -6,32 +6,23 @@ import databaseAccess as da
 import timeCard as tc
 import smtplib, sys, os
 
-# def print_usage():
-#     print("Usage: generateTimeCards.py <period start date> <period end date>")
-#     print("Date format: YYYY-MM-DD")
-#     sys.exit()
-
-# # check the commandline arguments
-# if len(sys.argv) != 3:
-#     print_usage()
-
-# # get arguments from commandline
-# start = sys.argv[1]
-# end = sys.argv[2]
 
 # ask for necessary inputs
 print("Date format:  YYYY-MM-DD")
 start = input("Enter pay period start date:  ")
 end   = input("Enter pay period end date:    ")
+first = input("Enter first name:             ")
+last  = input("Enter last name:              ")
 
 payday = False
 timecards = {}
+id = da.get_employee_id(first, last)
 
 # get all the rows from the database between the start and end dates
 print(f"\nGetting all hours submitted between {start} and {end}...")
 result = da.get_time_cards(start, end)
 
-print("Building time cards...")
+print(f"Building updated time card for {first.title()} {last.title()}")
 if result:
     for r in result:
         if r.id in timecards:
@@ -52,39 +43,39 @@ if result:
         # loop through the timecards and send them to their recipients
         tmpPath = './timeCard.txt'
         for t in timecards.values():
-            msg = MIMEMultipart()
-            msg['From'] = f"{Header('TimeBot').encode()} <{os.environ['SMTP_USERNAME']}>"
-            print(f"Sending time card to {t.name}...")
+            # only email the one timecard that was changed
+            if t.id == id:
+                msg = MIMEMultipart()
+                msg['From'] = f"{Header('TimeBot').encode()} <{os.environ['SMTP_USERNAME']}>"
+                print(f"Sending time card to {t.name}...")
 
-            msg['Subject'] = f"Time Card for payday: {payday}"
-            msg['To'] = t.email
+                msg['Subject'] = f"Time Card for payday: {payday}"
+                msg['To'] = t.email
 
-            # write the current timecard to a file
-            f = open(tmpPath, "w")
-            f.write(t.to_string())
-            f.close()
+                # write the current timecard to a file
+                f = open(tmpPath, "w")
+                f.write(t.to_string())
+                f.close()
 
-            # add the timecard file as an attachment to the email
-            f = open(tmpPath, "rb")
-            card = MIMEBase('application', 'octet-stream')
-            card.set_payload(f.read())
-            encoders.encode_base64(card)
-            card.add_header('Content-Disposition', 'attachment; filename="TimeCard.txt"')
-            msg.attach(card)
+                # add the timecard file as an attachment to the email
+                f = open(tmpPath, "rb")
+                card = MIMEBase('application', 'octet-stream')
+                card.set_payload(f.read())
+                encoders.encode_base64(card)
+                card.add_header('Content-Disposition', 'attachment; filename="TimeCard.txt"')
+                msg.attach(card)
 
-            try:
-                smtp.send_message(msg)
-            except Exception as e:
-                print(f"Failed to send timecard to {t.name}")
-                print(f"\t{e.__cause__}")
-                print(f"\t{e.with_traceback}")
+                try:
+                    smtp.send_message(msg)
+                except Exception as e:
+                    print(f"Failed to send timecard to {t.name}")
+                    print(f"\t{e.__cause__}")
+                    print(f"\t{e.with_traceback}")
 
-            # clean up the old message before next iteration
-            del msg
-            f.close()
+                f.close()
 
         # send all the results to TP for payroll submission
-        print("Sending payroll totals to admin...")
+        print("Sending new payroll totals to admin...")
         fro = os.environ['SMTP_USERNAME']
         to = da.get_employee_email(da.get_employee_id('taylor', 'poulsen'))
         
@@ -93,7 +84,7 @@ if result:
         cost_sum = 0
         body =  f"From: TimeBot <{fro}>\n"
         body += f"To: TP <{to}>\n"
-        body += f"Subject: PCC Payroll totals for the week of {start}\n\n"
+        body += f"Subject: PCC Updated payroll totals for the week of {start}\n\n"
         body += f"Pay period: {start}  <->  {end}\nPayday: {payday}\n\n"
 
         for t in timecards.values():

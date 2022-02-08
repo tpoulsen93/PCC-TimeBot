@@ -105,10 +105,10 @@ def submit_time(id, time, msg) -> str:
     dupe = duplicate_submission(id, today)
     if not dupe:
         stmt = insert(payroll).values(id = id, time = time, date = today, message = msg)
-        result = f"submitted {str(time)} hours"
+        result = f"Total hours: {str(time)}"
     else:
         stmt = text("UPDATE payroll SET time = :t, message = :m WHERE id = :i AND date = :d")
-        result = f"updated submission from {str(dupe)} to {str(time)} hours"
+        result = f"Total hours: Updated from {str(dupe)} to {str(time)}"
     with engine.connect() as conn:
         conn.execute(stmt, t = time, m = msg, i = id, d = today)
     return result
@@ -163,12 +163,10 @@ def update_employee(first, last, target, value):
     return f"{first.title()} {last.title()}'s {target} was changed to {value}"
 
 
-# get all the information for the indicated dates from the database and send them
-# to the parser to build the json object of time cards
+# get all the information for the indicated dates from the database
 def get_time_cards(start, end):
     stmt = text(f"SELECT id, time, date FROM payroll \
         WHERE date >= '{start}'::date AND date <= '{end}'::date ORDER BY id")
     with engine.connect() as conn:
         result = conn.execute(stmt)
     return result
-

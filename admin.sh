@@ -3,6 +3,7 @@
 # list of all possible actions whose index is a primary key for the scripts
 actions=(
     "Send time cards"
+    "Send updated time card"
     "Add a new employee"
     "Update an existing employee"
     "Make a new time submission"
@@ -11,6 +12,7 @@ actions=(
 # list of all the scripts that correspond to the actions above
 scripts=(
     "admin.sendTimeCards"
+    "admin.resendTimeCard"
     "admin.addEmployee"
     "admin.updateEmployee"
     "admin.addTime"
