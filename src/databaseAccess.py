@@ -121,11 +121,11 @@ def add_time(first, last, date, time):
     id = get_employee_id(first, last)
     dupe = duplicate_submission(id, date)
     if not dupe:
-        msg = f"Added {first} {last} manually on {today}"
+        msg = f"Submitted manually for {first} {last} on {today}"
         stmt = insert(payroll).values(id = id, time = time, date = date, message = msg)
         result = f"Submitted {time:g} hours for {first.title()} {last.title()} on {date}"
     else:
-        msg = f"Updated {first} {last} manually on {today}"
+        msg = f"Updated manually for {first} {last} on {today}"
         stmt = text("UPDATE payroll SET time = :t, message = :m WHERE id = :i AND date = :d")
         result = f"Updated submission for {first.title()} {last.title()} from {dupe:g} to {time:g} hours on {date}"
     with engine.connect() as conn:
