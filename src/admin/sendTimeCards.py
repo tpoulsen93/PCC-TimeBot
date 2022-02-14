@@ -93,7 +93,7 @@ if result:
         cost_sum = 0
         body =  f"From: TimeBot <{fro}>\n"
         body += f"To: TP <{to}>\n"
-        body += f"Subject: PCC Payroll totals for the week of {start}\n\n"
+        body += f"Subject: PCC Payroll totals for payday -> {payday}\n\n"
         body += f"Pay period: {start}  <->  {end}\nPayday: {payday}\n\n"
 
         for t in timecards.values():
