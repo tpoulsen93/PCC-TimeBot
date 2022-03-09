@@ -117,6 +117,7 @@ def submit_time(id, time, msg) -> str:
 # add hours for an employee on specific date
 def add_time(first, last, date, time):
     today = (datetime.today() - timedelta(hours=7)).date()
+    time = float(time)
 
     id = get_employee_id(first, last)
     dupe = duplicate_submission(id, date)
