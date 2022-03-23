@@ -110,7 +110,7 @@ def submit_time(id, time, msg) -> str:
         result = f"Updated hours: {dupe:g} to {time:g}"
 
     stmt = text(f"INSERT INTO payroll(id, time, date, message) VALUES(:i, :t, :d, :m) \
-        ON CONFLICT ON CONSTRAINT submission DO UPDATE SET time = :t, message = :m WHERE id = :i AND date = :d")
+        ON CONFLICT ON CONSTRAINT submission DO UPDATE SET time = EXCLUDED.time, message = EXCLUDED.message")
 
     # dupe = duplicate_submission(id, today)
     # if not dupe:
