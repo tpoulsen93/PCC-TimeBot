@@ -1,4 +1,4 @@
-from sqlalchemy import MetaData, Table, Column, String, Integer, Float, Date
+from sqlalchemy import MetaData, Table, Column, String, Integer, Float, Date, UniqueConstraint
 from sqlalchemy import create_engine, insert, text, ForeignKey, TIMESTAMP
 from datetime import timedelta, datetime
 import os
@@ -28,7 +28,8 @@ payroll = Table(
     Column('time', Float),
     Column('date', Date),
     Column('message', String),
-    Column('timestamp', TIMESTAMP(timezone='america/boise'), nullable=False, default=datetime.now())
+    Column('timestamp', TIMESTAMP(timezone='america/boise'), nullable=False, default=datetime.now()),
+    UniqueConstraint('date', 'id', name='daily_submission')
 )
 
 meta.create_all(engine)
