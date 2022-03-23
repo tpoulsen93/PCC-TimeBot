@@ -104,7 +104,7 @@ def submit_time(id, time, msg) -> str:
     today = (datetime.today() - timedelta(hours=7)).date()
 
     dupe = duplicate_submission(id, today)
-    if not dupe:
+    if dupe == False:
         result = f"Submitted hours: {time:g}"
     else:
         result = f"Updated hours: {dupe:g} to {time:g}"
