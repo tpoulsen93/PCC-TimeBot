@@ -1,4 +1,4 @@
-from src.exceptions import *
+from exceptions import *
 from datetime import timedelta
 
 
