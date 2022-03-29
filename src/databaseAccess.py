@@ -56,14 +56,12 @@ def get_employee_id(first: str, last: str) -> int:
 
 # return the first and last name of the employee associated with the id
 def get_employee_name(id) -> str:
-    stmt = text("SELECT first_name, last_name FROM employees \
-        WHERE id = :i")
+    stmt = text("SELECT first_name, last_name FROM employees WHERE id = :i")
     with engine.connect() as conn:
         result = conn.execute(stmt, i = id)
-    
-    first = result[0]
-    last = result[1]
-    return f"{first} {last}"
+
+    name = result.first()
+    return f"{name[0]} {name[1]}"
 
 
 def get_employee_phone(id) -> str:
@@ -117,21 +115,23 @@ def submit_time(id, time, msg) -> str:
     return result
     
 
-# add hours for an employee on specific date
-def add_time(first, last, date, time):
+# manually add hours for an employee on specific date
+def add_time(id, date, time):
     today = (datetime.today() - timedelta(hours=7)).date()
     time = float(time)
 
-    id = get_employee_id(first, last)
+    name = get_employee_name(id)
     dupe = duplicate_submission(id, date)
-    if not dupe:
-        msg = f"Submitted manually for {first} {last} on {today}"
-        stmt = insert(payroll).values(id = id, time = time, date = date, message = msg)
-        result = f"Submitted {time:g} hours for {first.title()} {last.title()} on {date}"
+    if dupe == False:
+        msg = f"Submitted manually for {name} on {today}"
+        result = f"Submitted {time:g} hours for {name.title()} on {date}"
     else:
-        msg = f"Updated manually for {first} {last} on {today}"
-        stmt = text("UPDATE payroll SET time = :t, message = :m WHERE id = :i AND date = :d")
-        result = f"Updated submission for {first.title()} {last.title()} from {dupe:g} to {time:g} hours on {date}"
+        msg = f"Updated manually for {name} on {today}"
+        result = f"Updated submission for {name.title()} from {dupe:g} to {time:g} hours on {date}"
+
+    stmt = text(f"INSERT INTO payroll(id, time, date, message) VALUES(:i, :t, :d, :m) \
+        ON CONFLICT ON CONSTRAINT submission DO UPDATE SET time = EXCLUDED.time, message = EXCLUDED.message")
+
     with engine.connect() as conn:
         conn.execute(stmt, t = time, m = msg, i = id, d = date)
     return result

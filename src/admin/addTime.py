@@ -1,5 +1,5 @@
 import databaseAccess as da
-
+import twilioActions as ta
 
 # get all the inputs
 first =     input("Enter employee first name:       ")
@@ -16,6 +16,9 @@ print(f"hours:  {time}")
 good = input("\nSubmit? (y/n)   ")
 print()
 if good.startswith("y"):
-    print(da.add_time(first, last, date, time))
+    id = da.get_employee_id(first, last)
+    result = da.add_time(id, date, time)
+    ta.confirm_submission(id, result, "don't care")
+    print(result)
 else:
     print("Cancelled. See you in the next life...")
