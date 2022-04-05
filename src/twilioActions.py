@@ -1,4 +1,4 @@
-import src.databaseAccess as databaseAccess
+import databaseAccess as databaseAccess
 from twilio.rest import Client
 import os
 

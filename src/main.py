@@ -1,5 +1,5 @@
-import src.messageParser as messageParser
-import src.databaseAccess as databaseAccess
+import messageParser as messageParser
+import databaseAccess as databaseAccess
 import json, sys, os
 
 from fastapi import FastAPI, Form, Response, Request, HTTPException
