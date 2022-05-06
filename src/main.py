@@ -10,7 +10,7 @@ app = FastAPI()
 
 def text_usage(response: MessagingResponse):
     response.message(
-        "Usage: <time/draw> <first name> <last name> <start time> <end time> <subtracted hours(lunch)>\
+        "Usage: Time <first name> <last name> <start time> <end time> <subtracted hours(lunch)>\
             [<additional hours(drive time)>]\nExample:")
     response.message("Time Taylor Poulsen 11:46am 5:04pm 1.25 3.6")
 
