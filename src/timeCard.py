@@ -46,8 +46,9 @@ class TimeCard:
 
         for d in self.days.keys():
             result += self.build_day_line(d)
-
-        # result += f"\n\nWage:  ${round(self.wage, 2)}/hr\n"
+        
+        result += "\n\n"
+        # result += f"Wage:  ${round(self.wage, 2)}/hr\n"
         result += f"Total hours:  {round(self.total_hours, 2)}\n"
         # result +=  "Gross pay:  ${:0,.2f}\n".format(self.wage * self.total_hours)
         result += f"Payday:  {self.payday}\n"
