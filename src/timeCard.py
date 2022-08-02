@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 import databaseAccess as da
 
 
@@ -19,7 +19,7 @@ class TimeCard:
             current += timedelta(days=1)
 
         employee = da.get_employee(id)
-        for e in employee:
+        for e in employee: # this is weird...
             self.name = f"{e.first_name.title()} {e.last_name.title()}"
             self.email = e.email
             self.phone = e.phone
@@ -55,7 +55,9 @@ class TimeCard:
 
         return result
 
-    
+    # use last name for sorting
+    def __lt__(self, other):
+        return self.name.split()[1] < other.name.split()[1]
 
 
 

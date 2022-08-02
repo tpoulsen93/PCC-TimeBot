@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from email import encoders
 from email.header import Header
 from email.mime.base import MIMEBase
@@ -7,16 +8,28 @@ import timeCard as tc
 import smtplib, sys, os
 
 
-# ask for necessary inputs
-print("Date format:  YYYY-MM-DD")
-start = input("Enter pay period start date:  ")
-end   = input("Enter pay period end date:    ")
+print("Enter desired timecard generation style:")
+print("[w] Weekly pay period")
+print("[c] Custom pay period")
+style = input("Enter style:    -->  ")
+
+print("\nDate format:  YYYY-MM-DD")
+if style == "c":
+    start = input("Enter pay period start date:  ")
+    end   = input("Enter pay period end date:    ")
+    payday = False
+elif style == "w":
+    temp_pday  = input("Enter payday for weekly pay period:  ")
+    payday = datetime.strptime(temp_pday, '%Y-%m-%d').date()
+    end = payday - timedelta(days=12)
+    start = str(end - timedelta(days=6))
+    end = str(end)
+
 first = input("Enter first name:             ")
 last  = input("Enter last name:              ")
-
-payday = False
-timecards = {}
 id = da.get_employee_id(first, last)
+
+timecards = {}
 
 # get all the rows from the database between the start and end dates
 print(f"\nGetting all hours submitted between {start} and {end}...")
@@ -34,6 +47,9 @@ if result:
             if not payday:
                 payday = timecards[r.id].payday
 
+    # sort time cards
+    sortedTimeCards = sorted(timecards.values())
+
 
     # setup smtp to send emails
     print("Connecting to SMTP server...")
@@ -42,7 +58,7 @@ if result:
 
         # loop through the timecards and send them to their recipients
         tmpPath = './timeCard.txt'
-        for t in timecards.values():
+        for t in sortedTimeCards:
             # only email the one timecard that was changed
             if t.id == id:
                 msg = MIMEMultipart()
@@ -72,13 +88,15 @@ if result:
                     print(f"\t{e.__cause__}")
                     print(f"\t{e.with_traceback}")
 
+                # clean up old timecard before next iteration
+                del msg
                 f.close()
 
         # send all the results to TP for payroll submission
         print("Sending new payroll totals to admin...")
         fro = os.environ['SMTP_USERNAME']
         to = da.get_employee_email(da.get_employee_id('taylor', 'poulsen'))
-        
+
         # build the message body from all the timecards
         hours_sum = 0
         cost_sum = 0
@@ -87,11 +105,11 @@ if result:
         body += f"Subject: PCC Updated payroll totals for the week of {start}\n\n"
         body += f"Pay period: {start}  <->  {end}\nPayday: {payday}\n\n"
 
-        for t in timecards.values():
+        for t in sortedTimeCards:
             hours_sum += t.total_hours
             cost_sum += t.total_hours * t.wage
             body += f"{t.name}  -->  {round(t.total_hours, 2)}\n"
-            
+
         body += f"\nTotal Hours  -->  {hours_sum}"
         body += f"\nTotal Cost  -->  {cost_sum}"
 
