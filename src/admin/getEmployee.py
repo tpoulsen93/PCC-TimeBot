@@ -1,0 +1,20 @@
+import databaseAccess as da
+
+
+# get all the inputs
+first = input("Enter employee first name:       ")
+last = input("Enter employee last name:        ")
+
+# indeces for result
+ID = 0
+PHONE = 4
+EMAIL = 5
+SUPERVISOR_ID = 6
+
+employee = da.get_employee(da.get_employee_id(first, last))
+
+print(f"Name:       {first.title()} {last.title()}")
+print(f"ID:         {employee[ID]}")
+print(f"Phone:      {employee[PHONE]}")
+print(f"Email:      {employee[EMAIL]}")
+print(f"Supervisor: {da.get_employee_name(employee[SUPERVISOR_ID])}")

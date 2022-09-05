@@ -7,6 +7,7 @@ actions=(
     "Add a new employee"
     "Update an existing employee"
     "Make a new time submission"
+    "Get employee summary"
 )
 
 # list of all the scripts that correspond to the actions above
@@ -16,6 +17,7 @@ scripts=(
     "admin.addEmployee"
     "admin.updateEmployee"
     "admin.addTime"
+    "admin.getEmployee"
 )
 
 # print out all the possible script options
@@ -38,4 +40,3 @@ if [[ $i -ge 0 && $i -lt ${#actions[@]} ]]; then
 else
     echo "Bad choice... Game over."
 fi
-

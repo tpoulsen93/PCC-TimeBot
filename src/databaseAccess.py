@@ -5,12 +5,12 @@ import os
 
 
 url = os.environ['DATABASE_URL']
-url = url.replace("postgres", "postgresql") 
+url = url.replace("postgres", "postgresql")
 engine = create_engine(url)
 meta = MetaData()
 
 employees = Table(
-    'employees', meta, 
+    'employees', meta,
     Column('id', Integer, autoincrement=True, primary_key=True),
     Column('first_name', String),
     Column('last_name', String),
@@ -61,7 +61,7 @@ def get_employee_name(id) -> str:
         result = conn.execute(stmt, i = id)
 
     name = result.first()
-    return f"{name[0]} {name[1]}"
+    return f"{name[0].title()} {name[1].title()}"
 
 
 def get_employee_phone(id) -> str:
@@ -84,7 +84,7 @@ def get_employee(id):
     stmt = text("SELECT * FROM employees WHERE id = :i")
     with engine.connect() as conn:
         result = conn.execute(stmt, i = id)
-    return result
+    return result if not result else result.fetchone()
 
 
 def duplicate_submission(id, date):
@@ -113,7 +113,7 @@ def submit_time(id, time, msg) -> str:
     with engine.connect() as conn:
         conn.execute(stmt, t = time, m = msg, i = id, d = today)
     return result
-    
+
 
 # manually add hours for an employee on specific date
 def add_time(id, date, time):
