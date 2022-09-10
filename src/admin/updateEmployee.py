@@ -4,7 +4,7 @@ import databaseAccess as da
 # get all the inputs
 first =     input("Enter employee first name:       ")
 last =      input("Enter employee last name:        ")
-target =    input("Enter target: <wage|email|phone> ")
+target =    input("Enter target: <email | phone | supervisor_id> ")
 value =     input("Enter new value:                 ")
 
 # double check everything

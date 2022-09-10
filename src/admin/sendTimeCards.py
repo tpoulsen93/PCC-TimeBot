@@ -131,11 +131,11 @@ with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
 
     for t in sortedTimeCards:
         hours_sum += t.total_hours
-        cost_sum += t.total_hours * t.wage
+        # cost_sum += t.total_hours * t.wage
         body += f"{t.name}  -->  {round(t.total_hours, 2)}\n"
 
     body += f"\nTotal Hours  -->  {hours_sum}"
-    body += f"\nTotal Cost  -->  {cost_sum}"
+    # body += f"\nTotal Cost  -->  {cost_sum}"
 
     smtp.sendmail(fro, to, body)
 

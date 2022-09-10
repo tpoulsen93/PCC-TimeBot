@@ -19,11 +19,14 @@ class TimeCard:
             current += timedelta(days=1)
 
         employee = da.get_employee(id)
-        for e in employee: # this is weird...
-            self.name = f"{e.first_name.title()} {e.last_name.title()}"
-            self.email = e.email
-            self.phone = e.phone
-            self.wage = float(e.wage)
+        FIRST = 1
+        LAST = 2
+        PHONE = 4
+        EMAIL = 5
+        self.name = f"{employee[FIRST].title()} {employee[LAST].title()}"
+        self.email = employee[EMAIL]
+        self.phone = employee[PHONE]
+        # self.wage = float(e.wage)
 
 
     def add_hours(self, date: str, hours: float):
