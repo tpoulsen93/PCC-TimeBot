@@ -56,9 +56,13 @@ def process_time(message: str, fro: str) -> str:
         more = 0
     result =  f"{today}\n"
     result += f"{mess[1].title()} {mess[2].title()}\n"
-    result += f"{submission}\n"
-    result += f"Lunch hours: {less}\n"
-    result += f"Extra hours: {more}"
+    result += f"Start: {start}\n"
+    result += f"End: {end}\n"
+    if less > 0:
+        result += f"Lunch hours: {less}\n"
+    if more > 0:
+        result += f"Extra hours: {more}\n"
+    result += f"{submission}"
     confirmation = ta.confirm_submission(employee_id, result, fro)
 
     if confirmation:
