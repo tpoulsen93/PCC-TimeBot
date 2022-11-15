@@ -3,3 +3,4 @@ __pycache__/
 .env
 */test.py
 */timeCard.txt
+.DS_Store
