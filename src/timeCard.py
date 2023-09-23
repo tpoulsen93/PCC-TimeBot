@@ -2,15 +2,14 @@ from datetime import datetime, timedelta
 import databaseAccess as da
 
 
-
 class TimeCard:
     def __init__(self, id, start_date, end_date):
         self.id = id
         self.days = {}
         self.total_hours = 0
 
-        start = datetime.strptime(start_date, '%Y-%m-%d').date()
-        end = datetime.strptime(end_date, '%Y-%m-%d').date()
+        start = datetime.strptime(start_date, "%Y-%m-%d").date()
+        end = datetime.strptime(end_date, "%Y-%m-%d").date()
         self.payday = end + timedelta(days=12)
 
         current = start
@@ -28,24 +27,21 @@ class TimeCard:
         self.phone = employee[PHONE]
         # self.wage = float(e.wage)
 
-
     def add_hours(self, date: str, hours: float):
         self.days[date] = round(hours, 2)
         self.total_hours += hours
 
-
     def build_day_line(self, date: str) -> str:
         return "{:^10s} | {:^4s}| {:^5s}\n".format(
             date,
-            datetime.strptime(date, '%Y-%m-%d').strftime('%A')[:3],
-            f"{round(self.days[date], 2):g}"
+            datetime.strptime(date, "%Y-%m-%d").strftime("%A")[:3],
+            f"{round(self.days[date], 2):g}",
         )
 
-
     def to_string(self) -> str:
-        result =  f"{self.name}\n\n\n"
-        result +=  "{:^11s}|{:^5s}|{:>6s}\n".format("Date", "Day", "Hours")
-        result += "{:-^11}+{:-^5}+{:->6}\n".format("","","")
+        result = f"{self.name}\n\n\n"
+        result += "{:^11s}|{:^5s}|{:>6s}\n".format("Date", "Day", "Hours")
+        result += "{:-^11}+{:-^5}+{:->6}\n".format("", "", "")
 
         for d in self.days.keys():
             result += self.build_day_line(d)
@@ -61,8 +57,3 @@ class TimeCard:
     # use last name for sorting
     def __lt__(self, other):
         return self.name.split()[1] < other.name.split()[1]
-
-
-
-
-

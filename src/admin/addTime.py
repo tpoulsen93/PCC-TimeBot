@@ -2,10 +2,10 @@ import databaseAccess as da
 import twilioActions as ta
 
 # get all the inputs
-first =     input("Enter employee first name:       ")
-last =      input("Enter employee last name:        ")
-date =      input("Enter date:     <YYYY-MM-DD>     ")
-time =      input("Enter hours:                     ")
+first = input("Enter employee first name:       ")
+last = input("Enter employee last name:        ")
+date = input("Enter date:     <YYYY-MM-DD>     ")
+time = input("Enter hours:                     ")
 
 # double check everything
 print("\n")

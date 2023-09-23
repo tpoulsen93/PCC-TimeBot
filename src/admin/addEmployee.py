@@ -2,12 +2,12 @@ import databaseAccess as da
 
 
 # get all the inputs
-first =     input("Enter employee first name:       ")
-last =      input("Enter employee last name:        ")
-email =     input("Enter employee email address:    ")
-phone =     input("Enter employee phone number:     ")
-s_first =   input("Enter supervisor first name:     ")
-s_last =    input("Enter supervisor last name:      ")
+first = input("Enter employee first name:       ")
+last = input("Enter employee last name:        ")
+email = input("Enter employee email address:    ")
+phone = input("Enter employee phone number:     ")
+s_first = input("Enter supervisor first name:     ")
+s_last = input("Enter supervisor last name:      ")
 
 
 # double check everything

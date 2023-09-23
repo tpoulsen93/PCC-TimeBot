@@ -5,14 +5,19 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 import databaseAccess as da
 import timeCard as tc
-import smtplib, sys, os
+import smtplib
+import sys
+import os
 
 DEV_MODE = False
 
+
 def print_usage():
-    print("Usage: generateTimeCards.py [<period start date> <period end date>]")
+    print(
+        "Usage: generateTimeCards.py [<period start date> <period end date>]")
     print("Date format: YYYY-MM-DD")
     sys.exit()
+
 
 # get pay period start and end dates from commandline
 if len(sys.argv) == 3:
@@ -35,10 +40,10 @@ elif len(sys.argv) == 1:
     print("\nDate format:  YYYY-MM-DD")
     if style == "c":
         start = input("Enter pay period start date:  ")
-        end   = input("Enter pay period end date:    ")
+        end = input("Enter pay period end date:    ")
         payday = False
     elif style == "w":
-        temp_pday  = input("Enter payday for weekly pay period:  ")
+        temp_pday = input("Enter payday for weekly pay period:  ")
         payday = datetime.strptime(temp_pday, '%Y-%m-%d').date()
         end = payday - timedelta(days=12)
         start = str(end - timedelta(days=6))
@@ -102,7 +107,8 @@ with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
         card = MIMEBase('application', 'octet-stream')
         card.set_payload(f.read())
         encoders.encode_base64(card)
-        card.add_header('Content-Disposition', 'attachment; filename="TimeCard.txt"')
+        card.add_header('Content-Disposition',
+                        'attachment; filename="TimeCard.txt"')
         msg.attach(card)
 
         try:
@@ -124,22 +130,24 @@ with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
     # build the message body from all the timecards
     hours_sum = 0
     cost_sum = 0
-    body =  f"From: TimeBot <{fro}>\n"
+    body = f"From: TimeBot <{fro}>\n"
     body += f"To: TP <{to}>\n"
     body += f"Subject: PCC Payroll totals for payday -> {payday}\n\n"
     body += f"Pay period: {start}  <->  {end}\nPayday: {payday}\n\n"
 
+    print()  # add some whitespace
+
     for t in sortedTimeCards:
         hours_sum += t.total_hours
-        # cost_sum += t.total_hours * t.wage
-        body += f"{t.name}  -->  {round(t.total_hours, 2)}\n"
+        line = f"{t.name}  -->  {round(t.total_hours, 2)}\n"
+        print(line, end="")
+        body += line
 
     body += f"\nTotal Hours  -->  {hours_sum}"
-    # body += f"\nTotal Cost  -->  {cost_sum}"
 
     smtp.sendmail(fro, to, body)
 
-print("Mission accomplished")
+print("\nMission accomplished")
 
-#print everything to the logs
+# print everything to the logs
 # sys.stdout.flush()

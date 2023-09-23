@@ -22,7 +22,7 @@ def build_time_delta(time: str) -> timedelta:
             if hours != 12:
                 hours += 12
             arr[1] = arr[1].replace("pm", "")
-        else: # neither am nor pm detected
+        else:  # neither am nor pm detected
             raise MeridiemException
 
         # validate the minutes
@@ -30,7 +30,7 @@ def build_time_delta(time: str) -> timedelta:
         if minutes < 0 or minutes > 59:
             raise MinutesException
 
-    else:   # 9am
+    else:  # 9am
         if len(time) < 3 or len(time) > 4:
             raise TimeException
 
@@ -47,7 +47,7 @@ def build_time_delta(time: str) -> timedelta:
                 hours = int(time)
             else:
                 hours = int(time) + 12
-        else: # neither am nor pm detected
+        else:  # neither am nor pm detected
             raise MeridiemException
 
         if hours < 1 or hours > 24:
@@ -65,7 +65,7 @@ def calculate_time(start: str, end: str, less: str, more: str) -> float:
     # check for any other exceptions in the message
     if endTime < startTime:
         raise IllegalTimeException
-    
+
     try:
         subtract = float(less)
     except:

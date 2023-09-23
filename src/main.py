@@ -1,12 +1,14 @@
 import messageParser as messageParser
 import databaseAccess as databaseAccess
-import json, sys, os
+import sys
+import os
 
 from fastapi import FastAPI, Form, Response, Request, HTTPException
 from twilio.twiml.messaging_response import MessagingResponse
-from twilio.request_validator import RequestValidator  
+from twilio.request_validator import RequestValidator
 
 app = FastAPI()
+
 
 def text_usage(response: MessagingResponse):
     response.message(
@@ -27,14 +29,16 @@ async def parse_message(request: Request, From: str = Form(...), Body: str = For
     form_ = await request.form()
     if not validator.validate(str(request.url), form_, request.headers.get("X-Twilio-Signature", "")):
         print("unexpected user encountered")
-        raise HTTPException(status_code=400, detail="Error in Twilio Signature")
+        raise HTTPException(
+            status_code=400, detail="Error in Twilio Signature")
 
     # process the message
-    response = MessagingResponse()     
+    response = MessagingResponse()
     try:
         msg = messageParser.process_message(Body, From)
     except Exception as e:
-        response.message("Encountered an unexpected error. Check your format and try again.")
+        response.message(
+            "Encountered an unexpected error. Check your format and try again.")
         print("Encountered unexpected error in message:")
         print(f"[{Body}]")
         print(e)
@@ -57,7 +61,6 @@ async def parse_message(request: Request, From: str = Form(...), Body: str = For
         print(f"[{Body}]")
         print("Responded:")
         print(f"[{msg}]")
-        
 
     sys.stdout.flush()
     return Response(content=str(response), media_type="application/xml")

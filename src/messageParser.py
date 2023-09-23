@@ -6,7 +6,6 @@ from exceptions import *
 from timeCalc import calculate_time
 
 
-
 time_error = "Error. Time formatted incorrectly."
 
 
@@ -16,7 +15,6 @@ def process_time(message: str, fro: str) -> str:
         return f"{time_error} Too few parameters."
     if len(mess) > 7:
         return f"{time_error} Too many parameters."
-
 
     # get the employee id
     employee_id = da.get_employee_id(mess[1], mess[2])
@@ -54,7 +52,7 @@ def process_time(message: str, fro: str) -> str:
     submission = da.submit_time(employee_id, time, message)
     if more == "":
         more = 0
-    result =  f"{today}\n"
+    result = f"{today}\n"
     result += f"{mess[1].title()} {mess[2].title()}\n"
     result += f"{submission}\n"
     result += f"Lunch hours: {less}\n"
