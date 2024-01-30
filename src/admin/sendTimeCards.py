@@ -13,8 +13,7 @@ DEV_MODE = False
 
 
 def print_usage():
-    print(
-        "Usage: generateTimeCards.py [<period start date> <period end date>]")
+    print("Usage: generateTimeCards.py [<period start date> <period end date>]")
     print("Date format: YYYY-MM-DD")
     sys.exit()
 
@@ -26,7 +25,7 @@ if len(sys.argv) == 3:
     payday = False
 # get pay date from commandline
 elif len(sys.argv) == 2:
-    payday = datetime.strptime(sys.argv[1], '%Y-%m-%d').date()
+    payday = datetime.strptime(sys.argv[1], "%Y-%m-%d").date()
     end = payday - timedelta(days=12)
     start = str(end - timedelta(days=6))
     end = str(end)
@@ -44,7 +43,7 @@ elif len(sys.argv) == 1:
         payday = False
     elif style == "w":
         temp_pday = input("Enter payday for weekly pay period:  ")
-        payday = datetime.strptime(temp_pday, '%Y-%m-%d').date()
+        payday = datetime.strptime(temp_pday, "%Y-%m-%d").date()
         end = payday - timedelta(days=12)
         start = str(end - timedelta(days=6))
         end = str(end)
@@ -62,7 +61,8 @@ if not result:
 timecards = {}
 
 print("Building time cards...")
-
+tp_email = da.get_employee_email(da.get_employee_id("taylor", "poulsen"))
+jr_email = da.get_employee_email(da.get_employee_id("jr", "poulsen"))
 
 for r in result:
     if r.id in timecards:
@@ -78,74 +78,76 @@ for r in result:
 sortedTimeCards = sorted(timecards.values())
 
 if DEV_MODE:
-    for t in sortedTimeCards:
-        print(t.to_string() + "\n")
+    for tc in sortedTimeCards:
+        print(tc.to_string() + "\n")
     sys.exit()
 
 # setup smtp to send emails
 print("Connecting to SMTP server...")
 with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-    smtp.login(os.environ['SMTP_USERNAME'], os.environ['SMTP_PASSWORD'])
+    smtp.login(os.environ["SMTP_USERNAME"], os.environ["SMTP_PASSWORD"])
 
     # loop through the timecards and send them to their recipients
-    tmpPath = './timeCard.txt'
-    for t in sortedTimeCards:
+    tmpPath = "./timeCard.txt"
+    for tc in sortedTimeCards:
         msg = MIMEMultipart()
-        msg['From'] = f"{Header('TimeBot').encode()} <{os.environ['SMTP_USERNAME']}>"
-        print(f"Sending time card to {t.name}...")
+        msg["From"] = f"{Header('TimeBot').encode()} <{os.environ['SMTP_USERNAME']}>"
+        print(f"Sending time card to {tc.name}...")
 
-        msg['Subject'] = f"Time Card for payday: {payday}"
-        msg['To'] = t.email
+        msg["Subject"] = f"Time Card for payday: {payday}"
+        msg["To"] = tc.email
+        msg["Cc"] = jr_email
 
         # write the current timecard to a file
         f = open(tmpPath, "w")
-        f.write(t.to_string())
+        f.write(tc.to_string())
         f.close()
 
         # add the timecard file as an attachment to the email
         f = open(tmpPath, "rb")
-        card = MIMEBase('application', 'octet-stream')
+        card = MIMEBase("application", "octet-stream")
         card.set_payload(f.read())
         encoders.encode_base64(card)
-        card.add_header('Content-Disposition',
-                        'attachment; filename="TimeCard.txt"')
+        card.add_header("Content-Disposition", 'attachment; filename="TimeCard.txt"')
         msg.attach(card)
 
         try:
             smtp.send_message(msg)
         except Exception as e:
-            print(f"Failed to send timecard to {t.name}")
-            print(f"\t{e.__cause__}")
+            print(f"Failed to send timecard to {tc.name}")
             print(f"\t{e.with_traceback}")
+            print(f"\n\t{e}")
 
         # clean up the old message before next iteration
         del msg
         f.close()
 
-    # send all the results to TP for payroll submission
+    # send all the results to TP and JR for payroll submission
     print("Sending payroll totals to admin...")
-    fro = os.environ['SMTP_USERNAME']
-    to = da.get_employee_email(da.get_employee_id('taylor', 'poulsen'))
+    fro = os.environ["SMTP_USERNAME"]
+    to = tp_email
+    cc = jr_email
 
     # build the message body from all the timecards
     hours_sum = 0
     cost_sum = 0
     body = f"From: TimeBot <{fro}>\n"
     body += f"To: TP <{to}>\n"
+    body += f"Cc: JR <{cc}>\n"
     body += f"Subject: PCC Payroll totals for payday -> {payday}\n\n"
     body += f"Pay period: {start}  <->  {end}\nPayday: {payday}\n\n"
 
     print()  # add some whitespace
 
-    for t in sortedTimeCards:
-        hours_sum += t.total_hours
-        line = f"{t.name}  -->  {round(t.total_hours, 2)}\n"
+    for tc in sortedTimeCards:
+        hours_sum += tc.total_hours
+        line = f"{tc.name}  -->  {round(tc.total_hours, 2)}\n"
         print(line, end="")
         body += line
 
     body += f"\nTotal Hours  -->  {hours_sum}"
 
-    smtp.sendmail(fro, to, body)
+    smtp.sendmail(fro, [to, cc], body)
 
 print("\nMission accomplished")
 
