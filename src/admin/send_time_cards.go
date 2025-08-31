@@ -3,6 +3,7 @@ package admin
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/tpoulsen/pcc-timebot/src/database"
@@ -11,7 +12,7 @@ import (
 	"github.com/tpoulsen/pcc-timebot/src/timecard"
 )
 
-func SendTimeCards() {
+func SendTimeCards(startDateArg, endDateArg string, useLastPeriod bool) {
 	// Initialize database connection
 	if err := database.Initialize(); err != nil {
 		fmt.Printf("Failed to initialize database: %v\n", err)
@@ -19,8 +20,15 @@ func SendTimeCards() {
 	}
 
 	fmt.Println("Date format:  YYYY-MM-DD")
-	startDate := helpers.GetUserInput("Enter pay period start date:  ")
-	endDate := helpers.GetUserInput("Enter pay period end date:    ")
+	var startDate, endDate string
+
+	if useLastPeriod {
+		startDate, endDate = getDatesFromLastPeriod()
+	} else if startDateArg != "" && endDateArg != "" {
+		startDate, endDate = getDatesFromArgs(startDateArg, endDateArg)
+	} else {
+		startDate, endDate = getDatesFromUserInput()
+	}
 
 	// Parse dates
 	start, err := time.Parse("2006-01-02", startDate)
@@ -130,4 +138,64 @@ func SendTimeCards() {
 	}
 
 	fmt.Println("Mission accomplished")
+
+	// Save the end date for future use
+	if err := os.WriteFile(".last_end_date", []byte(endDate), 0644); err != nil {
+		fmt.Printf("Warning: Failed to save last end date: %v\n", err)
+	}
+}
+
+// getDatesFromLastPeriod reads the last end date from file and calculates the next 7-day period
+func getDatesFromLastPeriod() (string, string) {
+	// Read the last end date from file
+	lastEndData, err := os.ReadFile(".last_end_date")
+	if err != nil {
+		fmt.Printf("Failed to read last end date: %v\n", err)
+		fmt.Println("Please provide dates manually or run without -useLastPeriod first.")
+		os.Exit(1)
+	}
+	lastEndStr := strings.TrimSpace(string(lastEndData))
+	lastEnd, err := time.Parse("2006-01-02", lastEndStr)
+	if err != nil {
+		fmt.Printf("Invalid last end date format: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Calculate next 7-day period
+	start := lastEnd.AddDate(0, 0, 1) // Next day after last end
+	end := start.AddDate(0, 0, 6)     // 6 days later for 7-day period
+
+	startDate := start.Format("2006-01-02")
+	endDate := end.Format("2006-01-02")
+
+	fmt.Printf("Using last period's end date %s\n", lastEndStr)
+	fmt.Printf("Calculated next period: %s to %s\n", startDate, endDate)
+
+	return startDate, endDate
+}
+
+// getDatesFromArgs returns dates from command line arguments, prompting for missing ones
+func getDatesFromArgs(startDateArg, endDateArg string) (string, string) {
+	var startDate, endDate string
+
+	if startDateArg != "" {
+		startDate = startDateArg
+	} else {
+		startDate = helpers.GetUserInput("Enter pay period start date:  ")
+	}
+	if endDateArg != "" {
+		endDate = endDateArg
+	} else {
+		endDate = helpers.GetUserInput("Enter pay period end date:    ")
+	}
+
+	return startDate, endDate
+}
+
+// getDatesFromUserInput prompts the user for both start and end dates
+func getDatesFromUserInput() (string, string) {
+	startDate := helpers.GetUserInput("Enter pay period start date:  ")
+	endDate := helpers.GetUserInput("Enter pay period end date:    ")
+
+	return startDate, endDate
 }

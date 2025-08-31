@@ -125,6 +125,8 @@ func GetEmployeeEmail(id int) (string, error) {
 // GetEmployee returns all information about an employee
 func GetEmployee(id int) (*Employee, error) {
 	employee := &Employee{}
+	var phone, email sql.NullString
+
 	err := db.QueryRow(`
 		SELECT id, first_name, last_name, phone, email, supervisor_id, timestamp
 		FROM employees WHERE id = $1`,
@@ -133,14 +135,19 @@ func GetEmployee(id int) (*Employee, error) {
 		&employee.ID,
 		&employee.FirstName,
 		&employee.LastName,
-		&employee.Phone,
-		&employee.Email,
+		&phone,
+		&email,
 		&employee.SupervisorID,
 		&employee.Timestamp,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get employee: %w", err)
 	}
+
+	// Convert sql.NullString to regular strings
+	employee.Phone = phone.String
+	employee.Email = email.String
+
 	return employee, nil
 }
 
@@ -257,8 +264,8 @@ func AddEmployee(firstName, lastName string, email, phone string, superFirstName
 	}
 
 	_, err := db.Exec(`
-		INSERT INTO employees (first_name, last_name, supervisor_id, phone, email)
-		VALUES ($1, $2, $3, $4, $5, $6)`,
+		INSERT INTO employees (first_name, last_name, supervisor_id, phone, email, timestamp)
+		VALUES ($1, $2, $3, $4, $5, NOW())`,
 		firstName, lastName, supervisorID,
 		sql.NullString{String: phone, Valid: phone != ""},
 		sql.NullString{String: email, Valid: email != ""},

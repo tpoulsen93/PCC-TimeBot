@@ -36,6 +36,12 @@ func main() {
 	updateEmployee := flag.Bool("updateEmployee", false, "Run UpdateEmployee")
 	// if the sendTimeCards flag is set, run the sendTimeCards function
 	sendTimeCards := flag.Bool("sendTimeCards", false, "Run SendTimeCards")
+	// optional start date for sendTimeCards
+	startDate := flag.String("startDate", "", "Pay period start date (YYYY-MM-DD)")
+	// optional end date for sendTimeCards
+	endDate := flag.String("endDate", "", "Pay period end date (YYYY-MM-DD)")
+	// optional flag to use last period's end date and calculate next 7-day period
+	useLastPeriod := flag.Bool("useLastPeriod", false, "Use last period's end date to calculate next 7-day period")
 
 	flag.Parse()
 
@@ -57,9 +63,10 @@ func main() {
 		admin.UpdateEmployee()
 	case *sendTimeCards:
 		fmt.Println("Running SendTimeCards...")
-		admin.SendTimeCards()
+		admin.SendTimeCards(*startDate, *endDate, *useLastPeriod)
 	default:
 		fmt.Println("No valid command provided. Use -addTime, -updateEmployee, or -sendTimeCards.")
+		fmt.Println("For -sendTimeCards, you can optionally provide -startDate and -endDate (YYYY-MM-DD), or use -useLastPeriod to calculate the next 7-day period from the last used end date.")
 	}
 }
 

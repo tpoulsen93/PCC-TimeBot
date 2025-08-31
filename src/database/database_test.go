@@ -62,6 +62,14 @@ func Test_GetEmployeeID(t *testing.T) {
 }
 
 func Test_SubmitTime(t *testing.T) {
+	// Clean up any existing time entry for the test employee first
+	// Get today's date in Mountain Time (same as SubmitTime function)
+	loc, _ := time.LoadLocation("America/Denver")
+	today := time.Now().In(loc).Truncate(24 * time.Hour)
+
+	_, err := db.Exec("DELETE FROM payroll WHERE id = $1 AND date = $2", testID, today)
+	require.NoError(t, err)
+
 	// Setup test data
 	hours := 8.5
 	message := "Test time submission"
@@ -106,13 +114,18 @@ func Test_UpdateEmployee(t *testing.T) {
 	_, err := AddEmployee(firstName, lastName, "", "", "", "")
 	require.NoError(t, err)
 
+	// Get the employee ID that was just created
+	empID, err := GetEmployeeID(firstName, lastName)
+	require.NoError(t, err)
+	require.NotZero(t, empID)
+
 	// Test update
 	newPhone := "9876543210"
 	err = UpdateEmployee(firstName, lastName, "phone", newPhone)
 	require.NoError(t, err)
 
 	// Verify update
-	emp, err := GetEmployee(1)
+	emp, err := GetEmployee(empID)
 	require.NoError(t, err)
 	assert.Equal(t, newPhone, emp.Phone)
 

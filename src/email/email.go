@@ -169,6 +169,22 @@ func SendPayrollSummary(cfg *SMTPConfig, from, to string, timeCards map[int]*tim
 	body.WriteString(fmt.Sprintf("\nTotal Hours  -->  %.2f\n", hoursSum))
 	body.WriteString(fmt.Sprintf("Estimated Total Cost  -->  $%.2f\n", costSum))
 
+	// Print the summary to standard output
+	fmt.Printf("\nPayroll Summary for %s to %s\n", startDate.Format("2006-01-02"), endDate.Format("2006-01-02"))
+	fmt.Printf("Payday: %s\n\n", payday.Format("2006-01-02"))
+	fmt.Printf("%-30s %s\n", "Employee", "Hours")
+	fmt.Printf("%s %s\n", strings.Repeat("-", 30), strings.Repeat("-", 10))
+
+	for _, id := range ids {
+		tc := timeCards[id]
+		if tc == nil {
+			continue
+		}
+		fmt.Printf("%-30s %7.2f\n", tc.Name, tc.TotalHours)
+	}
+	fmt.Printf("\n%-30s %7.2f\n", "Total Hours:", hoursSum)
+	fmt.Printf("%-30s $%7.2f\n\n", "Estimated Total Cost:", costSum)
+
 	// Connect to SMTP server and send email
 	c, err := connectSMTP(cfg, from, to)
 	if err != nil {

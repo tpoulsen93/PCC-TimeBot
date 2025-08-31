@@ -4,3 +4,4 @@ __pycache__/
 */test.py
 */timeCard.txt
 .DS_Store
+.last_end_date

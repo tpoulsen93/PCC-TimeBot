@@ -67,7 +67,7 @@ func (tc *TimeCard) AddHours(date string, hours float64) error {
 		return fmt.Errorf("date %s not in pay period", date)
 	}
 
-	tc.Days[date] = hours
+	tc.Days[date] += hours
 	tc.TotalHours += hours
 	return nil
 }
