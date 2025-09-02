@@ -5,12 +5,14 @@ This directory contains the development container configuration for the PCC-Time
 ## What's Included
 
 ### Development Environment
+
 - **Go 1.24**: Latest Go runtime and tools
 - **PostgreSQL 15**: Database server with separate development and test databases
 - **VS Code Extensions**: Pre-configured extensions for Go development
 - **Development Tools**: Air (hot reload), golangci-lint, delve debugger, and more
 
 ### Services
+
 - **app**: Main application container with Go development environment
 - **db**: PostgreSQL development database (port 5432)
 - **test-db**: PostgreSQL test database (port 5433)
@@ -18,6 +20,7 @@ This directory contains the development container configuration for the PCC-Time
 ## Quick Start
 
 ### Prerequisites
+
 - [Docker Desktop](https://www.docker.com/products/docker-desktop)
 - [VS Code](https://code.visualstudio.com/)
 - [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
@@ -25,6 +28,7 @@ This directory contains the development container configuration for the PCC-Time
 ### Getting Started
 
 1. **Open in Dev Container**
+
    ```bash
    # From VS Code Command Palette (Ctrl/Cmd + Shift + P)
    # Run: "Dev Containers: Open Folder in Container"
@@ -32,6 +36,7 @@ This directory contains the development container configuration for the PCC-Time
    ```
 
 2. **Or use the command line**
+
    ```bash
    # Clone and open
    git clone <repository-url>
@@ -41,12 +46,14 @@ This directory contains the development container configuration for the PCC-Time
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .devcontainer/.env.example .env
    # Edit .env with your actual configuration values
    ```
 
 4. **Initialize the database**
+
    ```bash
    make db-setup
    ```
@@ -75,21 +82,25 @@ make db-reset       # Reset development database
 ## Database Access
 
 ### Development Database
+
 - **Host**: localhost
 - **Port**: 5432
 - **Database**: timebot_dev
-- **Username**: timebot_user
-- **Password**: timebot_password
+- **Username**: postgres
+- **Password**: (none required)
 
 ### Test Database
+
 - **Host**: localhost
-- **Port**: 5433
+- **Port**: 5432
 - **Database**: timebot_test
-- **Username**: timebot_user
-- **Password**: timebot_password
+- **Username**: postgres
+- **Password**: (none required)
 
 ### Sample Data
+
 The development database comes pre-populated with sample data:
+
 - Admin user (admin/admin)
 - Test employees (john doe, jane smith)
 - Sample payroll entries
@@ -97,11 +108,12 @@ The development database comes pre-populated with sample data:
 ## Configuration
 
 ### Environment Variables
+
 Key environment variables for development:
 
 ```bash
-DATABASE_URL=postgresql://timebot_user:timebot_password@localhost:5432/timebot_dev
-TEST_DATABASE_URL=postgresql://timebot_user:timebot_password@localhost:5433/timebot_test
+DATABASE_URL=postgresql://postgres@localhost:5432/timebot_dev?sslmode=disable
+TEST_DATABASE_URL=postgresql://postgres@localhost:5432/timebot_test?sslmode=disable
 SMTP_USERNAME=your-email@gmail.com
 SMTP_PASSWORD=your-app-password
 TWILIO_ACCOUNT_SID=your-twilio-sid
@@ -110,7 +122,9 @@ PORT=8080
 ```
 
 ### VS Code Settings
+
 The dev container comes with pre-configured VS Code settings for:
+
 - Go development tools
 - Formatting and linting
 - Testing integration
@@ -119,6 +133,7 @@ The dev container comes with pre-configured VS Code settings for:
 ## Testing
 
 ### Running Tests
+
 ```bash
 # All tests
 make test
@@ -131,11 +146,13 @@ make test-coverage
 ```
 
 ### Test Database
+
 Tests automatically use the separate test database to avoid affecting development data.
 
 ## Debugging
 
 The dev container includes the Delve debugger. You can:
+
 1. Set breakpoints in VS Code
 2. Use the Run and Debug panel
 3. Or debug from the command line with `dlv`
@@ -143,6 +160,7 @@ The dev container includes the Delve debugger. You can:
 ## Troubleshooting
 
 ### Container Issues
+
 ```bash
 # Rebuild container
 # From VS Code: "Dev Containers: Rebuild Container"
@@ -153,13 +171,18 @@ docker-compose -f .devcontainer/docker-compose.yml build --no-cache
 ```
 
 ### Database Issues
-```bash
+
+````bash
 # Reset database
 make db-reset
 
 # Check database connection
-PGPASSWORD=timebot_password psql -h localhost -p 5432 -U timebot_user -d timebot_dev
-```
+```bash
+# Check database connection
+psql -h localhost -U postgres -d timebot_dev
+````
+
+````
 
 ### Go Module Issues
 ```bash
@@ -167,14 +190,14 @@ PGPASSWORD=timebot_password psql -h localhost -p 5432 -U timebot_user -d timebot
 go clean -modcache
 go mod download
 go mod tidy
-```
+````
 
 ## Ports
 
 The following ports are forwarded to your local machine:
+
 - **8080**: Application server
-- **5432**: PostgreSQL development database
-- **5433**: PostgreSQL test database
+- **5432**: PostgreSQL database (both dev and test databases)
 
 ## File Structure
 

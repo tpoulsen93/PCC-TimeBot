@@ -1,7 +1,20 @@
-venv/*
-__pycache__/
+# Go build artifacts
+/pcc-timebot
+/bin/
+
+# Environment files
 .env
-*/test.py
+.env.local
+.env.production
+
+# Development files
 */timeCard.txt
+coverage.out
+coverage.html
+
+# OS files
 .DS_Store
 .last_end_date
+
+# Temporary files
+/tmp/

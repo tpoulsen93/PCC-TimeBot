@@ -1,9 +1,6 @@
 {
 	"name": "PCC-TimeBot Development Environment",
-	"dockerComposeFile": "docker-compose.yml",
-	"service": "app",
-	"workspaceFolder": "/workspace",
-	"shutdownAction": "stopCompose",
+	"image": "mcr.microsoft.com/devcontainers/go:1-1.24-bullseye",
 
 	// Configure tool-specific properties.
 	"customizations": {
@@ -15,7 +12,6 @@
 				"ms-vscode.vscode-json",
 				"bradlc.vscode-tailwindcss",
 				"esbenp.prettier-vscode",
-				"ms-python.python",
 				"ms-vscode.hexdump",
 				"redhat.vscode-yaml",
 				"GitHub.copilot",
@@ -32,33 +28,52 @@
 				"go.lintTool": "golangci-lint",
 				"go.vetOnSave": "package",
 				"go.testFlags": ["-v"],
-				"terminal.integrated.defaultProfile.linux": "bash"
+				"terminal.integrated.defaultProfile.linux": "zsh"
 			}
 		}
 	},
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	"features": {
-		"ghcr.io/devcontainers/features/git:1": {},
-		"ghcr.io/devcontainers/features/github-cli:1": {},
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+		"ghcr.io/devcontainers/features/common-utils:2": {
+			"installZsh": true,
+			"configureZshAsDefaultShell": true,
+			"installOhMyZsh": true,
+			"username": "vscode",
+			"userUid": "1000",
+			"userGid": "1000",
+			"upgradePackages": true
+		},
+		"ghcr.io/devcontainers/features/go:1": {
+			"version": "1.24"
+		},
+		"ghcr.io/itsmechlark/features/postgresql:1": {
+			"version": "15",
+			"initDbPath": ".devcontainer/init-db.sql"
+		},
+		"ghcr.io/devcontainers/features/node:1": {},
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
+		"ghcr.io/devcontainers/features/github-cli:1": {}
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [8080, 5432],
+	"forwardPorts": [8080],
 	"portsAttributes": {
 		"8080": {
 			"label": "Application",
 			"onAutoForward": "notify"
-		},
-		"5432": {
-			"label": "PostgreSQL",
-			"onAutoForward": "silent"
 		}
 	},
 
+	// Environment variables
+	"containerEnv": {
+		"DEBIAN_FRONTEND": "noninteractive",
+		"DATABASE_URL": "postgresql://postgres@localhost:5432/timebot_dev?sslmode=disable",
+		"TEST_DATABASE_URL": "postgresql://postgres@localhost:5432/timebot_test?sslmode=disable"
+	},
+
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "go mod download && go install -a std",
+	// "postCreateCommand": "go mod download && go install github.com/air-verse/air@latest",
 
 	// Use 'postStartCommand' to run commands after the container is started.
 	"postStartCommand": "echo 'Dev container started successfully!'",
