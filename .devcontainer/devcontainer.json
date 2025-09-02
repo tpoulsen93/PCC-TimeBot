@@ -1,0 +1,68 @@
+{
+	"name": "PCC-TimeBot Development Environment",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "app",
+	"workspaceFolder": "/workspace",
+	"shutdownAction": "stopCompose",
+
+	// Configure tool-specific properties.
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+				"golang.Go",
+				"ms-vscode.vscode-json",
+				"bradlc.vscode-tailwindcss",
+				"esbenp.prettier-vscode",
+				"ms-python.python",
+				"ms-vscode.hexdump",
+				"redhat.vscode-yaml",
+				"GitHub.copilot",
+				"GitHub.copilot-chat",
+				"ms-vscode.test-adapter-converter",
+				"hbenl.vscode-test-explorer"
+			],
+			"settings": {
+				"go.gopath": "/go",
+				"go.goroot": "/usr/local/go",
+				"go.toolsManagement.checkForUpdates": "local",
+				"go.useLanguageServer": true,
+				"go.formatTool": "goimports",
+				"go.lintTool": "golangci-lint",
+				"go.vetOnSave": "package",
+				"go.testFlags": ["-v"],
+				"terminal.integrated.defaultProfile.linux": "bash"
+			}
+		}
+	},
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	"features": {
+		"ghcr.io/devcontainers/features/git:1": {},
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+	},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	"forwardPorts": [8080, 5432],
+	"portsAttributes": {
+		"8080": {
+			"label": "Application",
+			"onAutoForward": "notify"
+		},
+		"5432": {
+			"label": "PostgreSQL",
+			"onAutoForward": "silent"
+		}
+	},
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "go mod download && go install -a std",
+
+	// Use 'postStartCommand' to run commands after the container is started.
+	"postStartCommand": "echo 'Dev container started successfully!'",
+
+	// Configure tool-specific properties.
+	"remoteUser": "vscode"
+}

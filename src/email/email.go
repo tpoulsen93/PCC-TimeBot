@@ -1,3 +1,5 @@
+// Package email provides email functionality for sending time cards and notifications.
+// It supports sending HTML emails with PDF attachments via SMTP.
 package email
 
 import (
@@ -17,15 +19,16 @@ import (
 	"github.com/tpoulsen/pcc-timebot/src/timecard"
 )
 
-// SMTPConfig holds SMTP server configuration
+// SMTPConfig holds SMTP server configuration for sending emails.
 type SMTPConfig struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
+	Host     string // SMTP server hostname
+	Port     int    // SMTP server port
+	Username string // SMTP username
+	Password string // SMTP password
 }
 
-// NewSMTPConfig creates a new SMTP configuration using environment variables
+// NewSMTPConfig creates a new SMTP configuration using environment variables.
+// It expects SMTP_USERNAME and SMTP_PASSWORD to be set in the environment.
 func NewSMTPConfig() *SMTPConfig {
 	return &SMTPConfig{
 		Host:     "smtp.gmail.com",
@@ -35,7 +38,7 @@ func NewSMTPConfig() *SMTPConfig {
 	}
 }
 
-// connectSMTP establishes a TLS connection to the SMTP server and returns a ready-to-use client
+// connectSMTP establishes a TLS connection to the SMTP server and returns a ready-to-use client.
 func connectSMTP(cfg *SMTPConfig, from, to string) (*smtp.Client, error) {
 	tlsConfig := &tls.Config{
 		ServerName:         cfg.Host,

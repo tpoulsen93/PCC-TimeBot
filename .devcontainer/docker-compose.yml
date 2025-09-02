@@ -1,0 +1,60 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+
+    volumes:
+      - ..:/workspace:cached
+
+    # Overrides default command so things don't shut down after the process ends.
+    command: sleep infinity
+
+    # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
+    network_mode: service:db
+
+    # Environment variables for development
+    environment:
+      - DATABASE_URL=postgresql://timebot_user:timebot_password@localhost:5432/timebot_dev
+      - TEST_DATABASE_URL=postgresql://timebot_user:timebot_password@localhost:5433/timebot_test
+      - SMTP_USERNAME=
+      - SMTP_PASSWORD=
+      - TWILIO_ACCOUNT_SID=
+      - TWILIO_AUTH_TOKEN=
+      - TWILIO_PHONE_NUMBER=
+      - PORT=8080
+
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: timebot_dev
+      # Create additional user
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
+    ports:
+      - "5432:5432"
+
+  # Test database for running tests
+  test-db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    volumes:
+      - test-postgres-data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: timebot_test
+      # Create additional user
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
+    ports:
+      - "5433:5432"
+
+volumes:
+  postgres-data:
+  test-postgres-data:

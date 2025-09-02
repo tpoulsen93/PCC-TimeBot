@@ -74,8 +74,8 @@ func TestRound_EdgeCases(t *testing.T) {
 }
 
 func TestGlobalWage(t *testing.T) {
-	assert.Equal(t, 30, GlobalWage)
-	assert.IsType(t, 30, GlobalWage)
+	assert.Equal(t, 30.0, GlobalWage)
+	assert.IsType(t, 30.0, GlobalWage)
 }
 
 func TestTitle(t *testing.T) {

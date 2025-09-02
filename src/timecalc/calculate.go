@@ -1,3 +1,5 @@
+// Package timecalc provides time calculation functionality for the PCC-TimeBot application.
+// It handles parsing time strings and calculating total work hours.
 package timecalc
 
 import (
@@ -10,6 +12,7 @@ import (
 	"github.com/tpoulsen/pcc-timebot/src/helpers"
 )
 
+// Error definitions for various time calculation failures
 var (
 	ErrTimeFormat  = errors.New("time formatted incorrectly")
 	ErrHours       = errors.New("hours spot is wrong")
@@ -20,7 +23,15 @@ var (
 	ErrExtra       = errors.New("additional hours formatted incorrectly")
 )
 
-// CalculateTime calculates the total hours worked based on start time, end time, lunch break, and extra time
+// CalculateTime calculates the total hours worked based on start time, end time, lunch break, and extra time.
+//
+// Parameters:
+//   - start: Start time in format "9:00am" or "9am"
+//   - end: End time in format "5:00pm" or "5pm"
+//   - less: Hours to subtract for lunch break (as string)
+//   - more: Additional hours to add (as string)
+//
+// Returns the total hours worked rounded to 2 decimal places, or an error if inputs are invalid.
 func CalculateTime(start, end, less, more string) (float64, error) {
 	startTime, err := getDuration(start)
 	if err != nil {
