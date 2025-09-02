@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tpoulsen/pcc-timebot/src/database"
-	"github.com/tpoulsen/pcc-timebot/src/helpers"
+	"github.com/tpoulsen/pcc-timebot/shared/database"
+	"github.com/tpoulsen/pcc-timebot/shared/helpers"
 )
 
 // TimeCard represents a time card for an employee during a specific pay period.

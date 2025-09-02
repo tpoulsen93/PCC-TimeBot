@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tpoulsen/pcc-timebot/src/database"
+	"github.com/tpoulsen/pcc-timebot/shared/database"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

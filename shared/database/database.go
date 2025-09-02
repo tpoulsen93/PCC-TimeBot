@@ -8,7 +8,7 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
-	"github.com/tpoulsen/pcc-timebot/src/helpers"
+	"github.com/tpoulsen/pcc-timebot/shared/helpers"
 )
 
 // Employee represents an employee record in the database
@@ -51,6 +51,11 @@ func Initialize() error {
 	}
 
 	return db.Ping()
+}
+
+// GetDB returns the database instance
+func GetDB() *sql.DB {
+	return db
 }
 
 // GetSupervisorID returns the supervisor ID for a given employee

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tpoulsen/pcc-timebot/src/helpers"
+	"github.com/tpoulsen/pcc-timebot/shared/helpers"
 )
 
 func Test_buildTimeDelta(t *testing.T) {

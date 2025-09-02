@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tpoulsen/pcc-timebot/src/database"
-	"github.com/tpoulsen/pcc-timebot/src/email"
-	"github.com/tpoulsen/pcc-timebot/src/helpers"
-	"github.com/tpoulsen/pcc-timebot/src/timecard"
+	"github.com/tpoulsen/pcc-timebot/internal/email"
+	"github.com/tpoulsen/pcc-timebot/shared/database"
+	"github.com/tpoulsen/pcc-timebot/shared/helpers"
+	"github.com/tpoulsen/pcc-timebot/shared/timecard"
 )
 
 func SendTimeCards(startDateArg, endDateArg string, useLastPeriod bool) {

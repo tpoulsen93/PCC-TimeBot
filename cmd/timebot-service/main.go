@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tpoulsen/pcc-timebot/src/admin"
-	"github.com/tpoulsen/pcc-timebot/src/database"
-	"github.com/tpoulsen/pcc-timebot/src/helpers"
-	"github.com/tpoulsen/pcc-timebot/src/timecalc"
+	"github.com/tpoulsen/pcc-timebot/internal/admin"
+	"github.com/tpoulsen/pcc-timebot/shared/database"
+	"github.com/tpoulsen/pcc-timebot/shared/helpers"
+	"github.com/tpoulsen/pcc-timebot/shared/timecalc"
 
 	"github.com/gin-gonic/gin"
 	"github.com/twilio/twilio-go"

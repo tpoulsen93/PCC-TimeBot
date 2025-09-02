@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tpoulsen/pcc-timebot/src/helpers"
-	"github.com/tpoulsen/pcc-timebot/src/timecard"
+	"github.com/tpoulsen/pcc-timebot/shared/helpers"
+	"github.com/tpoulsen/pcc-timebot/shared/timecard"
 )
 
 // SMTPConfig holds SMTP server configuration for sending emails.

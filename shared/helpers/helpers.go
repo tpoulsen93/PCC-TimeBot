@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/tpoulsen/pcc-timebot/src/constants"
+	"github.com/tpoulsen/pcc-timebot/shared/constants"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )

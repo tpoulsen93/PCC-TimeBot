@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tpoulsen/pcc-timebot/src/helpers"
+	"github.com/tpoulsen/pcc-timebot/shared/helpers"
 )
 
 // Error definitions for various time calculation failures

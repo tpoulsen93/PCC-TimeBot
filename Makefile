@@ -1,92 +1,120 @@
-# Makefile for PCC-TimeBot Development
+# PCC-TimeBot Multi-Service Makefile
 
-.PHONY: help build run test clean dev db-setup db-reset lint format
+.PHONY: help build-all test-all clean run-dev run-prod stop deps
 
 # Default target
-help: ## Show this help message
+help:
 	@echo "Available targets:"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
+	@echo "  build-all     - Build all services and CLI tools"
+	@echo "  test-all      - Run tests for all services"
+	@echo "  clean         - Clean build artifacts"
+	@echo "  run-dev       - Run services in development mode"
+	@echo "  run-prod      - Run services in production mode"
+	@echo "  stop          - Stop all running services"
+	@echo "  deps          - Download dependencies for all services"
+	@echo ""
+	@echo "Individual service targets:"
+	@echo "  build-timebot - Build timebot service"
+	@echo "  build-api     - Build web API service"
+	@echo "  build-cli     - Build all CLI tools"
+	@echo "  test-timebot  - Test timebot service"
+	@echo "  test-api      - Test web API service"
+	@echo ""
+	@echo "CLI tools:"
+	@echo "  build-add-time        - Build add-time CLI"
+	@echo "  build-send-timecards  - Build send-timecards CLI"
+	@echo "  build-update-employee - Build update-employee CLI"
 
-# Build the application
-build: ## Build the Go application
-	go build -o bin/pcc-timebot .
+# Build all services
+build-all: build-timebot build-api build-cli
 
-# Run the application with hot reload
-dev: ## Run the application in development mode with hot reload
-	air
+build-timebot:
+	@echo "Building timebot service..."
+	cd cmd/timebot-service && go build -o ../../bin/timebot-service .
 
-# Run the application normally
-run: ## Run the application
-	go run .
+build-api:
+	@echo "Building web API service..."
+	cd cmd/web-api && go build -o ../../bin/web-api .
 
-# Run tests
-test: ## Run all tests
-	go test ./...
+# Build CLI tools
+build-cli: build-add-time build-send-timecards build-update-employee
 
-# Run tests with verbose output
-test-verbose: ## Run tests with verbose output
-	go test -v ./...
+build-add-time:
+	@echo "Building add-time CLI..."
+	cd cmd/add-time && go build -o ../../bin/add-time .
 
-# Run tests with coverage
-test-coverage: ## Run tests with coverage report
-	go test -coverprofile=coverage.out ./...
-	go tool cover -html=coverage.out -o coverage.html
-	@echo "Coverage report generated: coverage.html"
+build-send-timecards:
+	@echo "Building send-timecards CLI..."
+	cd cmd/send-timecards && go build -o ../../bin/send-timecards .
 
-# Run database tests only
-test-db: ## Run database tests only
-	DATABASE_URL=postgresql://postgres@localhost:5432/timebot_test?sslmode=disable go test -v ./src/database
+build-update-employee:
+	@echo "Building update-employee CLI..."
+	cd cmd/update-employee && go build -o ../../bin/update-employee .
+
+# Test all services
+test-all: test-shared test-timebot test-api
+
+test-shared:
+	@echo "Testing shared packages..."
+	cd shared && go test ./...
+
+test-timebot:
+	@echo "Testing timebot service..."
+	go test ./cmd/timebot-service/... ./internal/admin/... ./internal/email/...
+
+test-api:
+	@echo "Testing web API service..."
+	go test ./cmd/web-api/... ./internal/handlers/... ./internal/middleware/...
 
 # Clean build artifacts
-clean: ## Clean build artifacts
+clean:
+	@echo "Cleaning build artifacts..."
 	rm -rf bin/
-	rm -f coverage.out coverage.html
+	rm -rf tmp/
+	go clean ./...
 
-# Format code
-format: ## Format Go code
-	go fmt ./...
-	goimports -w .
-
-# Lint code
-lint: ## Lint Go code
-	golangci-lint run
-
-# Install development dependencies
-deps: ## Install/update Go dependencies
-	go mod download
-	go mod tidy
-
-# Database setup
-db-setup: ## Set up the development database
-	@echo "Setting up development database..."
-	psql -h localhost -U postgres -d postgres -f .devcontainer/init-db.sql
-
-# Database reset
-db-reset: ## Reset the development database
-	@echo "Resetting development database..."
-	psql -h localhost -U postgres -d postgres -c "DROP DATABASE IF EXISTS timebot_dev; DROP DATABASE IF EXISTS timebot_test;"
-	make db-setup
-
-# Install development tools
-install-tools: ## Install Go development tools
-	go install github.com/air-verse/air@latest
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-	go install golang.org/x/tools/cmd/goimports@latest
-	go install github.com/go-delve/delve/cmd/dlv@latest
-
-# Docker commands
-docker-build: ## Build Docker image
-	docker build -t pcc-timebot .
-
-docker-run: ## Run Docker container
-	docker run -p 8080:8080 pcc-timebot
+# Download dependencies
+deps:
+	@echo "Downloading dependencies..."
+	go mod download && go mod tidy
 
 # Development environment
-dev-up: ## Start development environment
-	docker-compose -f .devcontainer/docker-compose.yml up -d
+run-dev:
+	@echo "Starting services in development mode..."
+	docker-compose up --build
 
-dev-down: ## Stop development environment
-	docker-compose -f .devcontainer/docker-compose.yml down
+# Production environment
+run-prod:
+	@echo "Starting services in production mode..."
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
-dev-logs: ## Show development environment logs
-	docker-compose -f .devcontainer/docker-compose.yml logs -f
+# Stop all services
+stop:
+	@echo "Stopping all services..."
+	docker-compose down
+
+# Create bin directory
+bin:
+	mkdir -p bin
+
+# Build targets depend on bin directory
+build-timebot: bin
+build-api: bin
+
+# Development shortcuts
+dev-timebot:
+	@echo "Running timebot service in development mode..."
+	cd cmd/timebot-service && go run .
+
+dev-api:
+	@echo "Running web API service in development mode..."
+	cd cmd/web-api && go run .
+
+# Air live reload (if installed)
+air-timebot:
+	@echo "Starting timebot service with Air live reload..."
+	cd cmd/timebot-service && air
+
+air-api:
+	@echo "Starting web API service with Air live reload..."
+	cd cmd/web-api && air

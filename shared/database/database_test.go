@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tpoulsen/pcc-timebot/src/helpers"
+	"github.com/tpoulsen/pcc-timebot/shared/helpers"
 )
 
 const testID = 1
