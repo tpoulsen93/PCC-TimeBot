@@ -3,6 +3,7 @@ package admin
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -11,6 +12,16 @@ import (
 	"github.com/tpoulsen/pcc-timebot/shared/helpers"
 	"github.com/tpoulsen/pcc-timebot/shared/timecard"
 )
+
+// getLastEndDateFilePath returns the path to the .last_end_date file
+// Uses the user's home directory to ensure consistent location regardless of where binary is run
+func getLastEndDateFilePath() (string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(homeDir, ".pcc-timebot-last-end-date"), nil
+}
 
 func SendTimeCards(startDateArg, endDateArg string, useLastPeriod bool) {
 	// Initialize database connection
@@ -140,18 +151,33 @@ func SendTimeCards(startDateArg, endDateArg string, useLastPeriod bool) {
 	fmt.Println("Mission accomplished")
 
 	// Save the end date for future use
-	if err := os.WriteFile(".last_end_date", []byte(endDate), 0644); err != nil {
-		fmt.Printf("Warning: Failed to save last end date: %v\n", err)
+	lastEndDateFile, err := getLastEndDateFilePath()
+	if err != nil {
+		fmt.Printf("Warning: Failed to get config file path: %v\n", err)
+	} else {
+		if err := os.WriteFile(lastEndDateFile, []byte(endDate), 0644); err != nil {
+			fmt.Printf("Warning: Failed to save last end date: %v\n", err)
+		} else {
+			fmt.Printf("Saved last end date to %s\n", lastEndDateFile)
+		}
 	}
 }
 
 // getDatesFromLastPeriod reads the last end date from file and calculates the next 7-day period
 func getDatesFromLastPeriod() (string, string) {
-	// Read the last end date from file
-	lastEndData, err := os.ReadFile(".last_end_date")
+	// Get the path to the last end date file
+	lastEndDateFile, err := getLastEndDateFilePath()
 	if err != nil {
-		fmt.Printf("Failed to read last end date: %v\n", err)
-		fmt.Println("Please provide dates manually or run without -useLastPeriod first.")
+		fmt.Printf("Failed to get config file path: %v\n", err)
+		fmt.Println("Please provide dates manually or run without -lastperiod first.")
+		os.Exit(1)
+	}
+
+	// Read the last end date from file
+	lastEndData, err := os.ReadFile(lastEndDateFile)
+	if err != nil {
+		fmt.Printf("Failed to read last end date from %s: %v\n", lastEndDateFile, err)
+		fmt.Println("Please provide dates manually or run without -lastperiod first.")
 		os.Exit(1)
 	}
 	lastEndStr := strings.TrimSpace(string(lastEndData))

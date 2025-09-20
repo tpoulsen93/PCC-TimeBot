@@ -5,7 +5,8 @@
 # Default target
 help:
 	@echo "Available targets:"
-	@echo "  build-all     - Build all services and CLI tools"
+	@echo "  build-all     - Build all services and CLI tools (current platform)"
+	@echo "  build-all-cross - Build all services and CLI tools (all platforms)"
 	@echo "  test-all      - Run tests for all services"
 	@echo "  clean         - Clean build artifacts"
 	@echo "  run-dev       - Run services in development mode"
@@ -16,17 +17,26 @@ help:
 	@echo "Individual service targets:"
 	@echo "  build-timebot - Build timebot service"
 	@echo "  build-api     - Build web API service"
-	@echo "  build-cli     - Build all CLI tools"
+	@echo "  build-cli     - Build all CLI tools (current platform)"
+	@echo "  build-cli-cross - Build all CLI tools (all platforms)"
 	@echo "  test-timebot  - Test timebot service"
 	@echo "  test-api      - Test web API service"
 	@echo ""
-	@echo "CLI tools:"
+	@echo "CLI tools (current platform):"
 	@echo "  build-add-time        - Build add-time CLI"
 	@echo "  build-send-timecards  - Build send-timecards CLI"
 	@echo "  build-update-employee - Build update-employee CLI"
+	@echo ""
+	@echo "CLI tools (cross-platform):"
+	@echo "  build-add-time-cross        - Build add-time CLI for all platforms"
+	@echo "  build-send-timecards-cross  - Build send-timecards CLI for all platforms"
+	@echo "  build-update-employee-cross - Build update-employee CLI for all platforms"
 
 # Build all services
 build-all: build-timebot build-api build-cli
+
+# Build all services for all platforms
+build-all-cross: build-timebot build-api build-cli-cross
 
 build-timebot:
 	@echo "Building timebot service..."
@@ -39,17 +49,41 @@ build-api:
 # Build CLI tools
 build-cli: build-add-time build-send-timecards build-update-employee
 
+# Cross-platform builds for all CLI tools
+build-cli-cross: build-add-time-cross build-send-timecards-cross build-update-employee-cross
+
 build-add-time:
 	@echo "Building add-time CLI..."
 	cd cmd/add-time && go build -o ../../bin/add-time .
+
+build-add-time-cross:
+	@echo "Building add-time CLI for all platforms..."
+	cd cmd/add-time && GOOS=darwin GOARCH=arm64 go build -o ../../bin/darwin-arm64/add-time .
+	cd cmd/add-time && GOOS=linux GOARCH=amd64 go build -o ../../bin/linux-amd64/add-time .
+	cd cmd/add-time && GOOS=linux GOARCH=arm64 go build -o ../../bin/linux-arm64/add-time .
+	cd cmd/add-time && GOOS=windows GOARCH=amd64 go build -o ../../bin/windows-amd64/add-time.exe .
 
 build-send-timecards:
 	@echo "Building send-timecards CLI..."
 	cd cmd/send-timecards && go build -o ../../bin/send-timecards .
 
+build-send-timecards-cross:
+	@echo "Building send-timecards CLI for all platforms..."
+	cd cmd/send-timecards && GOOS=darwin GOARCH=arm64 go build -o ../../bin/darwin-arm64/send-timecards .
+	cd cmd/send-timecards && GOOS=linux GOARCH=amd64 go build -o ../../bin/linux-amd64/send-timecards .
+	cd cmd/send-timecards && GOOS=linux GOARCH=arm64 go build -o ../../bin/linux-arm64/send-timecards .
+	cd cmd/send-timecards && GOOS=windows GOARCH=amd64 go build -o ../../bin/windows-amd64/send-timecards.exe .
+
 build-update-employee:
 	@echo "Building update-employee CLI..."
 	cd cmd/update-employee && go build -o ../../bin/update-employee .
+
+build-update-employee-cross:
+	@echo "Building update-employee CLI for all platforms..."
+	cd cmd/update-employee && GOOS=darwin GOARCH=arm64 go build -o ../../bin/darwin-arm64/update-employee .
+	cd cmd/update-employee && GOOS=linux GOARCH=amd64 go build -o ../../bin/linux-amd64/update-employee .
+	cd cmd/update-employee && GOOS=linux GOARCH=arm64 go build -o ../../bin/linux-arm64/update-employee .
+	cd cmd/update-employee && GOOS=windows GOARCH=amd64 go build -o ../../bin/windows-amd64/update-employee.exe .
 
 # Test all services
 test-all: test-shared test-timebot test-api
