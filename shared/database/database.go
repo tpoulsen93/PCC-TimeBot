@@ -29,6 +29,7 @@ type PayrollEntry struct {
 	Time       float64
 	Date       time.Time
 	Message    string
+	Location   string
 	Timestamp  time.Time
 }
 
@@ -173,7 +174,7 @@ func DuplicateSubmission(id int, date time.Time) (float64, error) {
 }
 
 // SubmitTime adds a new time entry or updates an existing one
-func SubmitTime(id int, hours float64, message string) (string, error) {
+func SubmitTime(id int, hours float64, message string, location string) (string, error) {
 	// Convert current time to Mountain Time (UTC-7)
 	loc, _ := time.LoadLocation("America/Denver")
 	today := time.Now().In(loc).Truncate(24 * time.Hour)
@@ -193,11 +194,11 @@ func SubmitTime(id int, hours float64, message string) (string, error) {
 
 	// Use upsert to either insert new record or update existing one
 	_, err = db.Exec(`
-		INSERT INTO payroll (id, time, date, message)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO payroll (id, time, date, message, location)
+		VALUES ($1, $2, $3, $4, $5)
 		ON CONFLICT ON CONSTRAINT submission
-		DO UPDATE SET time = EXCLUDED.time, message = EXCLUDED.message`,
-		id, hours, today, message,
+		DO UPDATE SET time = EXCLUDED.time, message = EXCLUDED.message, location = EXCLUDED.location`,
+		id, hours, today, message, location,
 	)
 	if err != nil {
 		return "", fmt.Errorf("failed to submit time: %w", err)
@@ -207,7 +208,7 @@ func SubmitTime(id int, hours float64, message string) (string, error) {
 }
 
 // AddTime manually adds or updates time for an employee on a specific date
-func AddTime(id int, date time.Time, hours float64) (string, error) {
+func AddTime(id int, date time.Time, hours float64, location string) (string, error) {
 	name, err := GetEmployeeName(id)
 	if err != nil {
 		return "", err
@@ -233,11 +234,11 @@ func AddTime(id int, date time.Time, hours float64) (string, error) {
 	}
 
 	_, err = db.Exec(`
-		INSERT INTO payroll (id, time, date, message)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO payroll (id, time, date, message, location)
+		VALUES ($1, $2, $3, $4, $5)
 		ON CONFLICT ON CONSTRAINT submission
-		DO UPDATE SET time = EXCLUDED.time, message = EXCLUDED.message`,
-		id, hours, date, message,
+		DO UPDATE SET time = EXCLUDED.time, message = EXCLUDED.message, location = EXCLUDED.location`,
+		id, hours, date, message, location,
 	)
 	if err != nil {
 		return "", fmt.Errorf("failed to add time: %w", err)

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -73,8 +74,8 @@ func main() {
 func textUsage(c *gin.Context) {
 	resp := TwiMLResponse{
 		Message: []string{
-			"Usage: Time <first name> <last name> <start time> <end time> <subtracted hours(lunch)> [<additional hours(drive time)>]\nExample:",
-			"Time Taylor Poulsen 11:46am 5:04pm 1.25 3.6",
+			"Usage: Time <first name> <last name> <start time> <end time> <subtracted hours(lunch)> [<additional hours(drive time)>] [\"<job location>\"]\nExample:",
+			"Time Taylor Poulsen 11:46am 5:04pm 1.25 3.6 \"Main Street Project\"",
 		},
 	}
 	c.XML(http.StatusOK, resp)
@@ -122,7 +123,7 @@ func runOnHeroku() {
 			return
 		}
 
-		result, err := database.AddTime(id, parsedDate, hours)
+		result, err := database.AddTime(id, parsedDate, hours, "")
 		if err != nil {
 			c.String(http.StatusInternalServerError, err.Error())
 			return
@@ -134,9 +135,7 @@ func runOnHeroku() {
 		}
 
 		c.String(http.StatusOK, result)
-	})
-
-	// SMS webhook endpoint
+	})	// SMS webhook endpoint
 	r.POST("/sms", func(c *gin.Context) {
 		// Validate Twilio signature
 		if !validateTwilioRequest(c) {
@@ -226,6 +225,15 @@ func processMessage(message, from string) (string, error) {
 }
 
 func processTime(message, from string) (string, error) {
+	// Extract quoted location if present (e.g., "Main Street Project")
+	location := ""
+	locationRegex := regexp.MustCompile(`"([^"]+)"`)
+	if match := locationRegex.FindStringSubmatch(message); len(match) > 1 {
+		location = match[1]
+		// Remove the quoted location from the message for normal parsing
+		message = locationRegex.ReplaceAllString(message, "")
+	}
+
 	parts := strings.Fields(message)
 	if len(parts) < 6 {
 		return "Error. Time formatted incorrectly. Too few parameters.", nil
@@ -274,7 +282,7 @@ func processTime(message, from string) (string, error) {
 	}
 
 	// Submit the time
-	submission, err := database.SubmitTime(employeeID, hours, message)
+	submission, err := database.SubmitTime(employeeID, hours, message, location)
 	if err != nil {
 		return "", fmt.Errorf("failed to submit time: %w", err)
 	}
@@ -299,6 +307,9 @@ func processTime(message, from string) (string, error) {
 	}
 	if moreHours > 0 {
 		result.WriteString(fmt.Sprintf("Extra hours: %s\n", more))
+	}
+	if location != "" {
+		result.WriteString(fmt.Sprintf("Location: %s\n", location))
 	}
 	result.WriteString(submission)
 

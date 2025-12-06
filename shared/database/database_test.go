@@ -85,13 +85,13 @@ func Test_SubmitTime(t *testing.T) {
 	hours := 8.5
 	message := "Test time submission"
 
-	result, err := SubmitTime(testID, hours, message)
+	result, err := SubmitTime(testID, hours, message, "")
 	require.NoError(t, err)
 	assert.Contains(t, result, "Submitted hours: 8.50")
 
 	// Test duplicate submission
 	newHours := 9.0
-	result, err = SubmitTime(testID, newHours, message)
+	result, err = SubmitTime(testID, newHours, message, "")
 	require.NoError(t, err)
 	assert.Contains(t, result, "Updated hours: 8.50 to 9.00")
 }

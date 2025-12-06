@@ -33,18 +33,17 @@ help:
 	@echo "  build-update-employee-cross - Build update-employee CLI for all platforms"
 
 # Build all services
-build-all: build-timebot build-api build-cli
-
-# Build all services for all platforms
-build-all-cross: build-timebot build-api build-cli-cross
+build-all: build-timebot build-api build-cli-cross
 
 build-timebot:
 	@echo "Building timebot service..."
-	cd cmd/timebot-service && go build -o ../../bin/timebot-service .
+	mkdir -p bin/darwin-arm64
+	cd cmd/timebot-service && go build -o ../../bin/darwin-arm64/timebot-service .
 
 build-api:
 	@echo "Building web API service..."
-	cd cmd/web-api && go build -o ../../bin/web-api .
+	mkdir -p bin/darwin-arm64
+	cd cmd/web-api && go build -o ../../bin/darwin-arm64/web-api .
 
 # Build CLI tools
 build-cli: build-add-time build-send-timecards build-update-employee
@@ -54,10 +53,12 @@ build-cli-cross: build-add-time-cross build-send-timecards-cross build-update-em
 
 build-add-time:
 	@echo "Building add-time CLI..."
-	cd cmd/add-time && go build -o ../../bin/add-time .
+	mkdir -p bin/darwin-arm64
+	cd cmd/add-time && go build -o ../../bin/darwin-arm64/add-time .
 
 build-add-time-cross:
 	@echo "Building add-time CLI for all platforms..."
+	mkdir -p bin/darwin-arm64 bin/linux-amd64 bin/linux-arm64 bin/windows-amd64
 	cd cmd/add-time && GOOS=darwin GOARCH=arm64 go build -o ../../bin/darwin-arm64/add-time .
 	cd cmd/add-time && GOOS=linux GOARCH=amd64 go build -o ../../bin/linux-amd64/add-time .
 	cd cmd/add-time && GOOS=linux GOARCH=arm64 go build -o ../../bin/linux-arm64/add-time .
@@ -65,10 +66,12 @@ build-add-time-cross:
 
 build-send-timecards:
 	@echo "Building send-timecards CLI..."
-	cd cmd/send-timecards && go build -o ../../bin/send-timecards .
+	mkdir -p bin/darwin-arm64
+	cd cmd/send-timecards && go build -o ../../bin/darwin-arm64/send-timecards .
 
 build-send-timecards-cross:
 	@echo "Building send-timecards CLI for all platforms..."
+	mkdir -p bin/darwin-arm64 bin/linux-amd64 bin/linux-arm64 bin/windows-amd64
 	cd cmd/send-timecards && GOOS=darwin GOARCH=arm64 go build -o ../../bin/darwin-arm64/send-timecards .
 	cd cmd/send-timecards && GOOS=linux GOARCH=amd64 go build -o ../../bin/linux-amd64/send-timecards .
 	cd cmd/send-timecards && GOOS=linux GOARCH=arm64 go build -o ../../bin/linux-arm64/send-timecards .
@@ -76,10 +79,12 @@ build-send-timecards-cross:
 
 build-update-employee:
 	@echo "Building update-employee CLI..."
-	cd cmd/update-employee && go build -o ../../bin/update-employee .
+	mkdir -p bin/darwin-arm64
+	cd cmd/update-employee && go build -o ../../bin/darwin-arm64/update-employee .
 
 build-update-employee-cross:
 	@echo "Building update-employee CLI for all platforms..."
+	mkdir -p bin/darwin-arm64 bin/linux-amd64 bin/linux-arm64 bin/windows-amd64
 	cd cmd/update-employee && GOOS=darwin GOARCH=arm64 go build -o ../../bin/darwin-arm64/update-employee .
 	cd cmd/update-employee && GOOS=linux GOARCH=amd64 go build -o ../../bin/linux-amd64/update-employee .
 	cd cmd/update-employee && GOOS=linux GOARCH=arm64 go build -o ../../bin/linux-arm64/update-employee .
@@ -103,7 +108,7 @@ test-api:
 # Clean build artifacts
 clean:
 	@echo "Cleaning build artifacts..."
-	rm -rf bin/
+	rm -rf bin/darwin-arm64/* bin/linux-amd64/* bin/linux-arm64/* bin/windows-amd64/*
 	rm -rf tmp/
 	go clean ./...
 
@@ -127,13 +132,13 @@ stop:
 	@echo "Stopping all services..."
 	docker-compose down
 
-# Create bin directory
-bin:
-	mkdir -p bin
+# Create bin directories
+bin-dirs:
+	mkdir -p bin/darwin-arm64 bin/linux-amd64 bin/linux-arm64 bin/windows-amd64
 
-# Build targets depend on bin directory
-build-timebot: bin
-build-api: bin
+# Build targets depend on bin directories
+build-timebot: bin-dirs
+build-api: bin-dirs
 
 # Development shortcuts
 dev-timebot:

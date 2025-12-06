@@ -58,7 +58,7 @@ func AddTime() error {
 	}
 
 	// Add time to database
-	result, err := database.AddTime(id, parsedDate, hoursFloat)
+	result, err := database.AddTime(id, parsedDate, hoursFloat, "")
 	if err != nil {
 		return fmt.Errorf("failed to add time: %w", err)
 	}

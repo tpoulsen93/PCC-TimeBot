@@ -33,7 +33,7 @@ func TestAddTime(t *testing.T) {
 	existingHours, err := database.DuplicateSubmission(id, today.Truncate(24*time.Hour))
 	require.NoError(t, err)
 
-	result, err = database.AddTime(id, today, 8.5)
+	result, err = database.AddTime(id, today, 8.5, "")
 	require.NoError(t, err)
 
 	// Adjust expectation based on whether there was existing data
@@ -44,7 +44,7 @@ func TestAddTime(t *testing.T) {
 	}
 
 	// Test updating the same day
-	result, err = database.AddTime(id, today, 9.0)
+	result, err = database.AddTime(id, today, 9.0, "")
 	require.NoError(t, err)
 	assert.Contains(t, result, "Updated submission for Test Employee from 8.50 to 9.00 hours")
 
