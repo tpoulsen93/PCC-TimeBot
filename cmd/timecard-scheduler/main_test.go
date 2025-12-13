@@ -168,18 +168,18 @@ func TestCalculateLastWeekDates(t *testing.T) {
 func TestCalculateLastWeekDates_ConsistentResults(t *testing.T) {
 	// Test that calling the function multiple times with the same input gives the same result
 	testDate := time.Date(2025, 12, 15, 12, 0, 0, 0, time.UTC)
-	
+
 	start1, end1, err1 := calculateLastWeekDates(testDate, "America/Denver")
 	start2, end2, err2 := calculateLastWeekDates(testDate, "America/Denver")
-	
+
 	if err1 != nil || err2 != nil {
 		t.Fatalf("Unexpected errors: err1=%v, err2=%v", err1, err2)
 	}
-	
+
 	if start1 != start2 {
 		t.Errorf("Inconsistent start dates: %v != %v", start1, start2)
 	}
-	
+
 	if end1 != end2 {
 		t.Errorf("Inconsistent end dates: %v != %v", end1, end2)
 	}
@@ -189,18 +189,18 @@ func TestCalculateLastWeekDates_TimeOfDayDoesNotMatter(t *testing.T) {
 	// Test that the time of day doesn't affect the result (only the date matters)
 	date := "2025-12-15"
 	timezone := "America/Denver"
-	
+
 	// Test at midnight
 	midnight, _ := time.Parse("2006-01-02 15:04:05", date+" 00:00:00")
 	startMidnight, endMidnight, err := calculateLastWeekDates(midnight, timezone)
 	if err != nil {
 		t.Fatalf("Unexpected error at midnight: %v", err)
 	}
-	
+
 	// Verify the function returns valid Monday-Sunday pairs
 	startT, _ := time.Parse("2006-01-02", startMidnight)
 	endT, _ := time.Parse("2006-01-02", endMidnight)
-	
+
 	if startT.Weekday() != time.Monday {
 		t.Errorf("Start date should be Monday, got %v", startT.Weekday())
 	}

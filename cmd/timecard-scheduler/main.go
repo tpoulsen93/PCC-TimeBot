@@ -18,21 +18,21 @@ func calculateLastWeekDates(now time.Time, timezone string) (startDate, endDate 
 	}
 
 	localNow := now.In(loc)
-	
+
 	// Get the most recent Monday (could be today if today is Monday)
 	currentWeekday := int(localNow.Weekday())
 	daysToMonday := currentWeekday - 1 // Monday is 1
-	if currentWeekday == 0 { // Sunday is 0
+	if currentWeekday == 0 {           // Sunday is 0
 		daysToMonday = 6
 	}
-	
+
 	// Last week's Monday is current Monday minus 7 days
 	lastMonday := localNow.AddDate(0, 0, -daysToMonday-7).Truncate(24 * time.Hour)
 	lastSunday := lastMonday.AddDate(0, 0, 6) // 6 days after Monday = Sunday
 
 	startDate = lastMonday.Format("2006-01-02")
 	endDate = lastSunday.Format("2006-01-02")
-	
+
 	return startDate, endDate, nil
 }
 
@@ -45,10 +45,10 @@ func main() {
 		fmt.Printf("Failed to load timezone: %v\n", err)
 		os.Exit(1)
 	}
-	
+
 	now := time.Now().In(loc)
 	fmt.Printf("Current time in Denver: %s (%s)\n", now.Format("2006-01-02 15:04:05 MST"), now.Weekday())
-	
+
 	if now.Weekday() != time.Monday {
 		fmt.Printf("Today is %s, not Monday. Skipping timecard send.\n", now.Weekday())
 		return

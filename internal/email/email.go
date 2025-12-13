@@ -53,7 +53,7 @@ func connectSMTP(cfg *SMTPConfig, from, to string) (*smtp.Client, error) {
 		InsecureSkipVerify: false,
 		MinVersion:         tls.VersionTLS12,
 	}
-	
+
 	if err = c.StartTLS(tlsConfig); err != nil {
 		c.Close()
 		return nil, fmt.Errorf("failed to start TLS: %w", err)
