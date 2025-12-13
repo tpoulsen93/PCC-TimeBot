@@ -200,7 +200,14 @@ func validateTwilioRequest(c *gin.Context) bool {
 	}
 
 	validator := client.NewRequestValidator(twilioAuthToken)
-	url := c.Request.URL.String()
+	
+	// Build full URL with scheme and host
+	scheme := "https"
+	if c.Request.TLS == nil {
+		scheme = "http"
+	}
+	url := scheme + "://" + c.Request.Host + c.Request.URL.String()
+	
 	params := make(map[string]string)
 	for key, values := range c.Request.PostForm {
 		params[key] = values[0]
