@@ -1,1 +1,1 @@
-web: pcc-timebot
+web: bin/timebot-service
