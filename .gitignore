@@ -16,5 +16,8 @@ coverage.html
 .DS_Store
 .last_end_date
 
+# Editor files
+.vscode/
+
 # Temporary files
 /tmp/
