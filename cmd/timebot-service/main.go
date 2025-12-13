@@ -198,6 +198,7 @@ func runOnHeroku() {
 func validateTwilioRequest(c *gin.Context) bool {
 	twilioAuthToken := os.Getenv("TWILIO_AUTH_TOKEN")
 	if twilioAuthToken == "" {
+		fmt.Println("TWILIO_AUTH_TOKEN not set")
 		return false
 	}
 
@@ -210,13 +211,18 @@ func validateTwilioRequest(c *gin.Context) bool {
 	}
 	url := scheme + "://" + c.Request.Host + c.Request.URL.String()
 	
+	// Parse form data
+	c.Request.ParseForm()
 	params := make(map[string]string)
 	for key, values := range c.Request.PostForm {
 		params[key] = values[0]
 	}
 	signature := c.GetHeader("X-Twilio-Signature")
 
-	return validator.Validate(url, params, signature)
+	fmt.Printf("Validation - URL: %s, Params count: %d, Signature: %s\n", url, len(params), signature)
+	result := validator.Validate(url, params, signature)
+	fmt.Printf("Validation result: %v\n", result)
+	return result
 }
 
 func processMessage(message, from string) (string, error) {
