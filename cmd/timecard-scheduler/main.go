@@ -39,6 +39,21 @@ func calculateLastWeekDates(now time.Time, timezone string) (startDate, endDate 
 func main() {
 	fmt.Println("Starting timecard scheduler...")
 
+	// Check if today is Monday
+	loc, err := time.LoadLocation("America/Denver")
+	if err != nil {
+		fmt.Printf("Failed to load timezone: %v\n", err)
+		os.Exit(1)
+	}
+	
+	now := time.Now().In(loc)
+	if now.Weekday() != time.Monday {
+		fmt.Printf("Today is %s, not Monday. Skipping timecard send.\n", now.Weekday())
+		return
+	}
+
+	fmt.Println("Today is Monday. Proceeding with timecard send...")
+
 	// Initialize database connection
 	if err := database.Initialize(); err != nil {
 		fmt.Printf("Failed to initialize database: %v\n", err)
@@ -46,7 +61,7 @@ func main() {
 	}
 
 	// Calculate last week's Monday-Sunday
-	startDate, endDate, err := calculateLastWeekDates(time.Now(), "America/Denver")
+	startDate, endDate, err := calculateLastWeekDates(now, "America/Denver")
 	if err != nil {
 		fmt.Printf("Failed to calculate dates: %v\n", err)
 		os.Exit(1)
