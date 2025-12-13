@@ -47,6 +47,8 @@ func main() {
 	}
 	
 	now := time.Now().In(loc)
+	fmt.Printf("Current time in Denver: %s (%s)\n", now.Format("2006-01-02 15:04:05 MST"), now.Weekday())
+	
 	if now.Weekday() != time.Monday {
 		fmt.Printf("Today is %s, not Monday. Skipping timecard send.\n", now.Weekday())
 		return
