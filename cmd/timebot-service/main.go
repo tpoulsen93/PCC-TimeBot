@@ -83,7 +83,8 @@ func textUsage(c *gin.Context) {
 
 func runOnHeroku() {
 	// Check if running on Heroku
-	if os.Getenv("DYNO") != "" {
+	if os.Getenv("DYNO") == "" {
+		fmt.Println("Not running on Heroku (DYNO env var not set)")
 		os.Exit(1)
 	}
 
