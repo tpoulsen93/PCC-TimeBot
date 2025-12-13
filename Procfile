@@ -1,1 +1,1 @@
-web: bin/timebot-service
+web: bin/timebot-service -heroku
