@@ -9,6 +9,33 @@ import (
 	"github.com/tpoulsen/pcc-timebot/shared/database"
 )
 
+// calculateLastWeekDates calculates the Monday-Sunday date range for the previous week
+// based on the provided current time in the specified timezone.
+func calculateLastWeekDates(now time.Time, timezone string) (startDate, endDate string, err error) {
+	loc, err := time.LoadLocation(timezone)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to load timezone: %w", err)
+	}
+
+	localNow := now.In(loc)
+	
+	// Get the most recent Monday (could be today if today is Monday)
+	currentWeekday := int(localNow.Weekday())
+	daysToMonday := currentWeekday - 1 // Monday is 1
+	if currentWeekday == 0 { // Sunday is 0
+		daysToMonday = 6
+	}
+	
+	// Last week's Monday is current Monday minus 7 days
+	lastMonday := localNow.AddDate(0, 0, -daysToMonday-7).Truncate(24 * time.Hour)
+	lastSunday := lastMonday.AddDate(0, 0, 6) // 6 days after Monday = Sunday
+
+	startDate = lastMonday.Format("2006-01-02")
+	endDate = lastSunday.Format("2006-01-02")
+	
+	return startDate, endDate, nil
+}
+
 func main() {
 	fmt.Println("Starting timecard scheduler...")
 
@@ -19,27 +46,11 @@ func main() {
 	}
 
 	// Calculate last week's Monday-Sunday
-	loc, err := time.LoadLocation("America/Denver")
+	startDate, endDate, err := calculateLastWeekDates(time.Now(), "America/Denver")
 	if err != nil {
-		fmt.Printf("Failed to load timezone: %v\n", err)
+		fmt.Printf("Failed to calculate dates: %v\n", err)
 		os.Exit(1)
 	}
-
-	now := time.Now().In(loc)
-	
-	// Get the most recent Monday (could be today if today is Monday)
-	currentWeekday := int(now.Weekday())
-	daysToMonday := currentWeekday - 1 // Monday is 1
-	if currentWeekday == 0 { // Sunday is 0
-		daysToMonday = 6
-	}
-	
-	// Last week's Monday is current Monday minus 7 days
-	lastMonday := now.AddDate(0, 0, -daysToMonday-7).Truncate(24 * time.Hour)
-	lastSunday := lastMonday.AddDate(0, 0, 6) // 6 days after Monday = Sunday
-
-	startDate := lastMonday.Format("2006-01-02")
-	endDate := lastSunday.Format("2006-01-02")
 
 	fmt.Printf("Sending timecards for period: %s to %s\n", startDate, endDate)
 
