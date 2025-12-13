@@ -205,9 +205,13 @@ func validateTwilioRequest(c *gin.Context) bool {
 	validator := client.NewRequestValidator(twilioAuthToken)
 	
 	// Build full URL with scheme and host
-	scheme := "https"
-	if c.Request.TLS == nil {
-		scheme = "http"
+	// Use X-Forwarded-Proto header (Heroku terminates SSL at load balancer)
+	scheme := c.GetHeader("X-Forwarded-Proto")
+	if scheme == "" {
+		scheme = "https"
+		if c.Request.TLS == nil {
+			scheme = "http"
+		}
 	}
 	url := scheme + "://" + c.Request.Host + c.Request.URL.String()
 	
