@@ -29,34 +29,37 @@ type SMTPConfig struct {
 
 // NewSMTPConfig creates a new SMTP configuration using environment variables.
 // It expects SMTP_USERNAME and SMTP_PASSWORD to be set in the environment.
+// Uses port 587 with STARTTLS which works on Heroku (port 465 is blocked).
 func NewSMTPConfig() *SMTPConfig {
 	return &SMTPConfig{
 		Host:     "smtp.gmail.com",
-		Port:     465,
+		Port:     587,
 		Username: os.Getenv("SMTP_USERNAME"),
 		Password: os.Getenv("SMTP_PASSWORD"),
 	}
 }
 
-// connectSMTP establishes a TLS connection to the SMTP server and returns a ready-to-use client.
+// connectSMTP establishes a connection to the SMTP server using STARTTLS and returns a ready-to-use client.
 func connectSMTP(cfg *SMTPConfig, from, to string) (*smtp.Client, error) {
+	// Connect to the SMTP server (plain connection first)
+	c, err := smtp.Dial(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port))
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to SMTP server: %w", err)
+	}
+
+	// Start TLS
 	tlsConfig := &tls.Config{
 		ServerName:         cfg.Host,
 		InsecureSkipVerify: false,
 		MinVersion:         tls.VersionTLS12,
 	}
-
-	conn, err := tls.Dial("tcp", fmt.Sprintf("%s:%d", cfg.Host, cfg.Port), tlsConfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create TLS connection: %w", err)
+	
+	if err = c.StartTLS(tlsConfig); err != nil {
+		c.Close()
+		return nil, fmt.Errorf("failed to start TLS: %w", err)
 	}
 
-	c, err := smtp.NewClient(conn, cfg.Host)
-	if err != nil {
-		conn.Close()
-		return nil, fmt.Errorf("failed to create SMTP client: %w", err)
-	}
-
+	// Authenticate
 	auth := smtp.PlainAuth("", cfg.Username, cfg.Password, cfg.Host)
 	if err = c.Auth(auth); err != nil {
 		c.Close()
