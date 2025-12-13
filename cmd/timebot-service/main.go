@@ -140,7 +140,9 @@ func runOnHeroku() {
 	r.POST("/sms", func(c *gin.Context) {
 		// Validate Twilio signature
 		if !validateTwilioRequest(c) {
-			fmt.Println("unexpected user encountered")
+			fmt.Println("unexpected user encountered - Twilio signature validation failed")
+			fmt.Printf("Request URL: https://%s%s\n", c.Request.Host, c.Request.URL.String())
+			fmt.Printf("Signature header: %s\n", c.GetHeader("X-Twilio-Signature"))
 			c.String(http.StatusBadRequest, "Error in Twilio Signature")
 			return
 		}
