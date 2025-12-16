@@ -11,15 +11,21 @@ import (
 	"github.com/tpoulsen/pcc-timebot/shared/helpers"
 )
 
+// DayEntry represents a single day's work entry with hours and optional location
+type DayEntry struct {
+	Hours    float64
+	Location string
+}
+
 // TimeCard represents a time card for an employee during a specific pay period.
 type TimeCard struct {
-	ID         int                // Employee ID
-	Name       string             // Full employee name
-	Email      string             // Employee email address
-	Phone      string             // Employee phone number
-	Days       map[string]float64 // Map of date (YYYY-MM-DD) to hours worked
-	TotalHours float64            // Total hours worked during the pay period
-	PayDay     time.Time          // Expected payday
+	ID         int                 // Employee ID
+	Name       string              // Full employee name
+	Email      string              // Employee email address
+	Phone      string              // Employee phone number
+	Days       map[string]DayEntry // Map of date (YYYY-MM-DD) to day entry
+	TotalHours float64             // Total hours worked during the pay period
+	PayDay     time.Time           // Expected payday
 }
 
 // NewTimeCard creates a new time card for an employee covering the specified date range.
@@ -49,7 +55,7 @@ func NewTimeCard(id int, startDate, endDate string) (*TimeCard, error) {
 	// Create the timecard with initial values
 	tc := &TimeCard{
 		ID:         id,
-		Days:       make(map[string]float64),
+		Days:       make(map[string]DayEntry),
 		TotalHours: 0,
 		PayDay:     end.AddDate(0, 0, 12), // 12 days after end date
 	}
@@ -57,7 +63,7 @@ func NewTimeCard(id int, startDate, endDate string) (*TimeCard, error) {
 	// Initialize days map with zero hours for each day
 	current := start
 	for !current.After(end) {
-		tc.Days[current.Format("2006-01-02")] = 0
+		tc.Days[current.Format("2006-01-02")] = DayEntry{Hours: 0, Location: ""}
 		current = current.AddDate(0, 0, 1)
 	}
 
@@ -80,9 +86,10 @@ func NewTimeCard(id int, startDate, endDate string) (*TimeCard, error) {
 // Parameters:
 //   - date: Date in "YYYY-MM-DD" format
 //   - hours: Number of hours worked (must be >= 0)
+//   - location: Optional job location/name
 //
 // Returns an error if the date is not in the pay period or hours are invalid.
-func (tc *TimeCard) AddHours(date string, hours float64) error {
+func (tc *TimeCard) AddHours(date string, hours float64, location string) error {
 	if hours < 0 {
 		return fmt.Errorf("hours cannot be negative: %.2f", hours)
 	}
@@ -94,7 +101,10 @@ func (tc *TimeCard) AddHours(date string, hours float64) error {
 	// Round hours to 2 decimal places for consistency
 	hours = helpers.Round(hours, 2)
 
-	tc.Days[date] += hours
+	entry := tc.Days[date]
+	entry.Hours += hours
+	entry.Location = location
+	tc.Days[date] = entry
 	tc.TotalHours = helpers.Round(tc.TotalHours+hours, 2)
 	return nil
 }
@@ -105,8 +115,8 @@ func (tc *TimeCard) String() string {
 
 	// Header
 	sb.WriteString(tc.Name + "\n\n\n")
-	sb.WriteString(fmt.Sprintf("%11s|%5s|%6s\n", "Date", "Day", "Hours"))
-	sb.WriteString(fmt.Sprintf("%s+%s+%s\n", strings.Repeat("-", 11), strings.Repeat("-", 5), strings.Repeat("-", 6)))
+	sb.WriteString(fmt.Sprintf("%11s|%5s|%6s|%s\n", "Date", "Day", "Hours", "Job Name"))
+	sb.WriteString(fmt.Sprintf("%s+%s+%s+%s\n", strings.Repeat("-", 11), strings.Repeat("-", 5), strings.Repeat("-", 6), strings.Repeat("-", 20)))
 
 	// Days - sort them by date
 	dates := make([]string, 0, len(tc.Days))
@@ -118,7 +128,12 @@ func (tc *TimeCard) String() string {
 	for _, date := range dates {
 		t, _ := time.Parse("2006-01-02", date)
 		dayName := t.Format("Mon")[:3]
-		sb.WriteString(fmt.Sprintf("%10s | %4s| %5.2f\n", date, dayName, tc.Days[date]))
+		entry := tc.Days[date]
+		location := entry.Location
+		if location == "" {
+			location = "-"
+		}
+		sb.WriteString(fmt.Sprintf("%10s | %4s| %5.2f| %s\n", date, dayName, entry.Hours, location))
 	}
 
 	// Footer
@@ -126,5 +141,62 @@ func (tc *TimeCard) String() string {
 	sb.WriteString(fmt.Sprintf("Total hours:  %.2f\n", tc.TotalHours))
 	sb.WriteString(fmt.Sprintf("Payday:  %s\n", tc.PayDay.Format("2006-01-02")))
 
+	return sb.String()
+}
+
+// ToHTML returns an HTML representation of the time card with proper table formatting
+func (tc *TimeCard) ToHTML() string {
+	var sb strings.Builder
+
+	// HTML email header with inline CSS
+	sb.WriteString(`<!DOCTYPE html>
+<html>
+<head>
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; }
+table { border-collapse: collapse; width: 100%; max-width: 700px; margin: 20px 0; }
+th, td { padding: 10px; text-align: left; border: 1px solid #ddd; }
+th { background-color: #4CAF50; color: white; font-weight: bold; }
+tr:nth-child(even) { background-color: #f2f2f2; }
+.total-row { font-weight: bold; background-color: #e8f5e9 !important; }
+.hours-col { text-align: right; }
+.header { margin-bottom: 10px; }
+.footer { margin-top: 20px; font-size: 14px; }
+</style>
+</head>
+<body>
+`)
+
+	sb.WriteString(fmt.Sprintf("<div class='header'><h2>%s</h2></div>\n", tc.Name))
+	sb.WriteString("<table>\n")
+	sb.WriteString("<tr><th>Date</th><th>Day</th><th class='hours-col'>Hours</th><th>Job Name</th></tr>\n")
+
+	// Days - sort them by date
+	dates := make([]string, 0, len(tc.Days))
+	for date := range tc.Days {
+		dates = append(dates, date)
+	}
+	sort.Strings(dates)
+
+	for _, date := range dates {
+		t, _ := time.Parse("2006-01-02", date)
+		dayName := t.Format("Mon")
+		entry := tc.Days[date]
+		location := entry.Location
+		if location == "" {
+			location = "-"
+		}
+		sb.WriteString(fmt.Sprintf("<tr><td>%s</td><td>%s</td><td class='hours-col'>%.2f</td><td>%s</td></tr>\n",
+			date, dayName, entry.Hours, location))
+	}
+
+	// Total row
+	sb.WriteString(fmt.Sprintf("<tr class='total-row'><td colspan='2'>Total</td><td class='hours-col'>%.2f</td><td></td></tr>\n", tc.TotalHours))
+	sb.WriteString("</table>\n")
+
+	// Payday
+	sb.WriteString(fmt.Sprintf("<div class='footer'><p><strong>Payday:</strong> %s</p></div>\n", tc.PayDay.Format("2006-01-02")))
+
+	sb.WriteString("</body>\n</html>")
 	return sb.String()
 }

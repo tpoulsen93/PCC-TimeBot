@@ -306,7 +306,7 @@ func UpdateEmployee(firstName, lastName, field, value string) error {
 // GetTimeCards retrieves all time card entries between start and end dates
 func GetTimeCards(start, end time.Time) ([]PayrollEntry, error) {
 	rows, err := db.Query(`
-		SELECT id, time, date FROM payroll
+		SELECT id, time, date, COALESCE(location, '') as location FROM payroll
 		WHERE date >= $1 AND date <= $2
 		ORDER BY id`,
 		start, end,
@@ -319,7 +319,7 @@ func GetTimeCards(start, end time.Time) ([]PayrollEntry, error) {
 	var entries []PayrollEntry
 	for rows.Next() {
 		var entry PayrollEntry
-		err := rows.Scan(&entry.EmployeeID, &entry.Time, &entry.Date)
+		err := rows.Scan(&entry.EmployeeID, &entry.Time, &entry.Date, &entry.Location)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan time card entry: %w", err)
 		}

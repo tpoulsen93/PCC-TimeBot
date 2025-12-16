@@ -15,35 +15,37 @@ func TestTimeCard_AddHours(t *testing.T) {
 		Name:       "John Doe",
 		Email:      "john@example.com",
 		Phone:      "555-1234",
-		Days:       make(map[string]float64),
+		Days:       make(map[string]DayEntry),
 		TotalHours: 0,
 		PayDay:     time.Now(),
 	}
 
 	// Initialize some days
-	tc.Days["2025-01-01"] = 0
-	tc.Days["2025-01-02"] = 0
+	tc.Days["2025-01-01"] = DayEntry{Hours: 0, Location: ""}
+	tc.Days["2025-01-02"] = DayEntry{Hours: 0, Location: ""}
 
 	// Test adding hours to valid date
-	err := tc.AddHours("2025-01-01", 8.5)
+	err := tc.AddHours("2025-01-01", 8.5, "Main Street")
 	assert.NoError(t, err)
-	assert.Equal(t, 8.5, tc.Days["2025-01-01"])
+	assert.Equal(t, 8.5, tc.Days["2025-01-01"].Hours)
+	assert.Equal(t, "Main Street", tc.Days["2025-01-01"].Location)
 	assert.Equal(t, 8.5, tc.TotalHours)
 
 	// Test adding more hours to same date
-	err = tc.AddHours("2025-01-01", 2.0)
+	err = tc.AddHours("2025-01-01", 2.0, "Oak Avenue")
 	assert.NoError(t, err)
-	assert.Equal(t, 10.5, tc.Days["2025-01-01"])
+	assert.Equal(t, 10.5, tc.Days["2025-01-01"].Hours)
+	assert.Equal(t, "Oak Avenue", tc.Days["2025-01-01"].Location)
 	assert.Equal(t, 10.5, tc.TotalHours)
 
 	// Test adding hours to another date
-	err = tc.AddHours("2025-01-02", 7.0)
+	err = tc.AddHours("2025-01-02", 7.0, "")
 	assert.NoError(t, err)
-	assert.Equal(t, 7.0, tc.Days["2025-01-02"])
+	assert.Equal(t, 7.0, tc.Days["2025-01-02"].Hours)
 	assert.Equal(t, 17.5, tc.TotalHours)
 
 	// Test adding hours to invalid date
-	err = tc.AddHours("2025-01-03", 5.0)
+	err = tc.AddHours("2025-01-03", 5.0, "")
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "not in pay period")
 	assert.Equal(t, 17.5, tc.TotalHours) // Should not change
@@ -57,10 +59,10 @@ func TestTimeCard_String(t *testing.T) {
 		Name:  "John Doe",
 		Email: "john@example.com",
 		Phone: "555-1234",
-		Days: map[string]float64{
-			"2025-01-01": 8.0,
-			"2025-01-02": 7.5,
-			"2025-01-03": 0.0,
+		Days: map[string]DayEntry{
+			"2025-01-01": {Hours: 8.0, Location: "Main Office"},
+			"2025-01-02": {Hours: 7.5, Location: ""},
+			"2025-01-03": {Hours: 0.0, Location: ""},
 		},
 		TotalHours: 15.5,
 		PayDay:     payday,
@@ -100,7 +102,7 @@ func TestTimeCard_String_Empty(t *testing.T) {
 		Name:       "Jane Smith",
 		Email:      "jane@example.com",
 		Phone:      "555-5678",
-		Days:       map[string]float64{},
+		Days:       map[string]DayEntry{},
 		TotalHours: 0,
 		PayDay:     payday,
 	}

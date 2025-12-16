@@ -5,11 +5,8 @@ package email
 import (
 	"bytes"
 	"crypto/tls"
-	"encoding/base64"
 	"fmt"
-	"mime/multipart"
 	"net/smtp"
-	"net/textproto"
 	"os"
 	"sort"
 	"strings"
@@ -79,42 +76,20 @@ func connectSMTP(cfg *SMTPConfig, from, to string) (*smtp.Client, error) {
 	return c, nil
 }
 
-// SendTimeCard sends a time card via email
-func SendTimeCard(cfg *SMTPConfig, from, to, name string, body []byte, payday time.Time) error {
+// SendTimeCard sends a time card via email as HTML
+func SendTimeCard(cfg *SMTPConfig, from, to, name string, htmlBody string, payday time.Time) error {
 	var buf bytes.Buffer
 
-	// Create multipart writer
-	writer := multipart.NewWriter(&buf)
-	boundary := writer.Boundary()
-
 	// Write email headers
-	headers := make(map[string]string)
-	headers["From"] = fmt.Sprintf("TimeBot <%s>", from)
-	headers["To"] = to
-	headers["Subject"] = fmt.Sprintf("Time Card for payday: %s", payday.Format("2006-01-02"))
-	headers["MIME-Version"] = "1.0"
-	headers["Content-Type"] = fmt.Sprintf("multipart/mixed; boundary=%s", boundary)
-
-	for k, v := range headers {
-		buf.WriteString(fmt.Sprintf("%s: %s\r\n", k, v))
-	}
+	buf.WriteString(fmt.Sprintf("From: TimeBot <%s>\r\n", from))
+	buf.WriteString(fmt.Sprintf("To: %s\r\n", to))
+	buf.WriteString(fmt.Sprintf("Subject: Time Card for payday: %s\r\n", payday.Format("2006-01-02")))
+	buf.WriteString("MIME-Version: 1.0\r\n")
+	buf.WriteString("Content-Type: text/html; charset=UTF-8\r\n")
 	buf.WriteString("\r\n")
 
-	// Add attachment part
-	header := make(textproto.MIMEHeader)
-	header.Set("Content-Type", "application/octet-stream")
-	header.Set("Content-Transfer-Encoding", "base64")
-	header.Set("Content-Disposition", `attachment; filename="TimeCard.txt"`)
-
-	part, err := writer.CreatePart(header)
-	if err != nil {
-		return fmt.Errorf("failed to create attachment part: %w", err)
-	}
-
-	encoder := base64.NewEncoder(base64.StdEncoding, part)
-	encoder.Write(body)
-	encoder.Close()
-	writer.Close()
+	// Write HTML body
+	buf.WriteString(htmlBody)
 
 	// Connect to SMTP server and send email
 	c, err := connectSMTP(cfg, from, to)

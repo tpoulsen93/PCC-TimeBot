@@ -87,7 +87,7 @@ func SendTimeCards(startDateArg, endDateArg string, useLastPeriod bool) {
 			}
 		}
 
-		if err := tc.AddHours(entry.Date.Format("2006-01-02"), entry.Time); err != nil {
+		if err := tc.AddHours(entry.Date.Format("2006-01-02"), entry.Time, entry.Location); err != nil {
 			fmt.Printf("Failed to add hours for employee %d: %v\n", entry.EmployeeID, err)
 		}
 	}
@@ -113,7 +113,7 @@ func SendTimeCards(startDateArg, endDateArg string, useLastPeriod bool) {
 			smtpConfig.Username,
 			tc.Email,
 			tc.Name,
-			[]byte(tc.String()),
+			tc.ToHTML(),
 			tc.PayDay); err != nil {
 			fmt.Printf("Failed to send time card to %s: %v\n", tc.Name, err)
 		}
