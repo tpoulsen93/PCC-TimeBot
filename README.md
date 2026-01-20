@@ -15,64 +15,47 @@ A Go-based payroll management application for Poulsen Concrete Company, enabling
 
 ### Prerequisites
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop)
-- [VS Code](https://code.visualstudio.com/)
-- [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+- Go (see `go.mod` for the version)
+
+Optional (only if you want to run integration tests against Postgres):
+
+- PostgreSQL
 
 ### Getting Started
 
-1. **Open in Dev Container**
+1. **Clone the repository**
 
    ```bash
-   # Clone the repository
    git clone <repository-url>
    cd PCC-TimeBot
-
-   # Open in VS Code and reopen in container
-   code .
-   # Use Command Palette: "Dev Containers: Reopen in Container"
    ```
 
 2. **Set up environment variables**
 
-   ```bash
-   cp .devcontainer/.env.example .env
-   # Edit .env with your configuration values
-   ```
+   Copy `.env.example` to `.env` and edit values as needed.
 
-3. **Start development**
+3. **Run tests**
+
    ```bash
-   make dev  # Starts with hot reload
+   make test-all
    ```
 
 ### Available Commands
 
 ```bash
 make help           # Show all available commands
-make dev            # Start with hot reload
-make build          # Build the application
-make test           # Run all tests
-make test-db        # Run database tests only
-make lint           # Run code linting
-make format         # Format code
-make db-setup       # Set up development database
-make db-reset       # Reset development database
+make build-all       # Build the application binaries
+make test-all        # Run unit tests (no database required)
 ```
 
 ### Project Structure
 
 ```
-├── src/
-│   ├── admin/          # Administrative functions
-│   ├── constants/      # Application constants
-│   ├── database/       # Database operations
-│   ├── email/          # Email functionality
-│   ├── helpers/        # Utility functions
-│   ├── timecalc/       # Time calculation logic
-│   └── timecard/       # Time card processing
-├── .devcontainer/      # Development container configuration
-├── scripts/            # Database and setup scripts
-└── main.go            # Application entry point
+├── cmd/                # Binaries (CLIs + services)
+├── internal/           # App internals (handlers, admin, email, middleware)
+├── shared/             # Shared packages (database, timecard, helpers, etc.)
+├── services/           # Dockerfiles for services (optional)
+└── timebot-mobile/     # Mobile app
 ```
 
 ### Testing
@@ -89,16 +72,18 @@ go test ./src/admin
 go test ./src/timecard
 ```
 
-Tests automatically use a separate test database to avoid affecting development data.
+By default, `go test ./...` / `make test-all` runs unit tests only (no database required).
+
+Database-backed tests are marked as integration tests and can be run explicitly with:
+
+```bash
+go test -tags=integration ./...
+```
 
 ### Database
 
-The application uses PostgreSQL with separate databases for development and testing:
-
-- **Development**: `timebot_dev` (port 5432)
-- **Testing**: `timebot_test` (port 5433)
-
-Database schema and sample data are automatically set up in the dev container.
+The application uses PostgreSQL for persistence in production (e.g. Heroku Postgres).
+Local Postgres is only required if you want to run the integration tests.
 
 ## Deployment
 

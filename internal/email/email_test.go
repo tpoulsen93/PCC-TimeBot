@@ -19,7 +19,7 @@ func TestNewSMTPConfig(t *testing.T) {
 	config := NewSMTPConfig()
 
 	assert.Equal(t, "smtp.gmail.com", config.Host)
-	assert.Equal(t, 465, config.Port)
+	assert.Equal(t, 587, config.Port)
 	assert.Equal(t, "test@example.com", config.Username)
 	assert.Equal(t, "testpassword", config.Password)
 }
@@ -32,7 +32,7 @@ func TestNewSMTPConfig_EmptyEnvVars(t *testing.T) {
 	config := NewSMTPConfig()
 
 	assert.Equal(t, "smtp.gmail.com", config.Host)
-	assert.Equal(t, 465, config.Port)
+	assert.Equal(t, 587, config.Port)
 	assert.Empty(t, config.Username)
 	assert.Empty(t, config.Password)
 }

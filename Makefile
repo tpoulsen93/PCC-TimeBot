@@ -1,6 +1,6 @@
 # PCC-TimeBot Multi-Service Makefile
 
-.PHONY: help build-all test-all clean run-dev run-prod stop deps
+.PHONY: help build-all test-all clean deps
 
 # Default target
 help:
@@ -9,9 +9,6 @@ help:
 	@echo "  build-all-cross - Build all services and CLI tools (all platforms)"
 	@echo "  test-all      - Run tests for all services"
 	@echo "  clean         - Clean build artifacts"
-	@echo "  run-dev       - Run services in development mode"
-	@echo "  run-prod      - Run services in production mode"
-	@echo "  stop          - Stop all running services"
 	@echo "  deps          - Download dependencies for all services"
 	@echo ""
 	@echo "Individual service targets:"
@@ -116,21 +113,6 @@ clean:
 deps:
 	@echo "Downloading dependencies..."
 	go mod download && go mod tidy
-
-# Development environment
-run-dev:
-	@echo "Starting services in development mode..."
-	docker-compose up --build
-
-# Production environment
-run-prod:
-	@echo "Starting services in production mode..."
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-
-# Stop all services
-stop:
-	@echo "Stopping all services..."
-	docker-compose down
 
 # Create bin directories
 bin-dirs:
