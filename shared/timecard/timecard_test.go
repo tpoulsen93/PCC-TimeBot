@@ -114,5 +114,34 @@ func TestTimeCard_String_Empty(t *testing.T) {
 	assert.Contains(t, result, "Payday:  2025-01-15")
 }
 
+func TestComputePayday_IsSecondFridayAfterPeriodEnd(t *testing.T) {
+	t.Run("period ends Sunday -> payday is second Friday", func(t *testing.T) {
+		// Period end: Sunday 2025-12-14
+		end := time.Date(2025, 12, 14, 0, 0, 0, 0, time.UTC)
+		payday := computePayday(end)
+
+		assert.Equal(t, time.Friday, payday.Weekday())
+		assert.Equal(t, "2025-12-26", payday.Format("2006-01-02"))
+	})
+
+	t.Run("period ends Saturday -> payday is second Friday", func(t *testing.T) {
+		// Period end: Saturday 2025-12-13
+		end := time.Date(2025, 12, 13, 0, 0, 0, 0, time.UTC)
+		payday := computePayday(end)
+
+		assert.Equal(t, time.Friday, payday.Weekday())
+		assert.Equal(t, "2025-12-26", payday.Format("2006-01-02"))
+	})
+
+	t.Run("period ends Friday -> payday is second Friday", func(t *testing.T) {
+		// Period end: Friday 2025-12-12
+		end := time.Date(2025, 12, 12, 0, 0, 0, 0, time.UTC)
+		payday := computePayday(end)
+
+		assert.Equal(t, time.Friday, payday.Weekday())
+		assert.Equal(t, "2025-12-26", payday.Format("2006-01-02"))
+	})
+}
+
 // Note: NewTimeCard cannot be easily unit tested because it depends on database calls.
 // Consider creating an interface for database operations to enable mocking in tests.

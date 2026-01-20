@@ -15,75 +15,75 @@ func TestCalculateLastWeekDates(t *testing.T) {
 		wantErr     bool
 	}{
 		{
-			name:        "Monday - should return last week Monday to Sunday",
+			name:        "Monday - should return last pay period Sunday to Saturday",
 			currentDate: "2025-12-15", // Monday
 			timezone:    "America/Denver",
-			wantStart:   "2025-12-01",
-			wantEnd:     "2025-12-07",
+			wantStart:   "2025-12-07",
+			wantEnd:     "2025-12-13",
 			wantErr:     false,
 		},
 		{
-			name:        "Tuesday - should return last week Monday to Sunday",
+			name:        "Tuesday - should return last pay period Sunday to Saturday",
 			currentDate: "2025-12-16", // Tuesday
 			timezone:    "America/Denver",
-			wantStart:   "2025-12-08",
-			wantEnd:     "2025-12-14",
+			wantStart:   "2025-12-07",
+			wantEnd:     "2025-12-13",
 			wantErr:     false,
 		},
 		{
-			name:        "Wednesday - should return last week Monday to Sunday",
+			name:        "Wednesday - should return last pay period Sunday to Saturday",
 			currentDate: "2025-12-17", // Wednesday
 			timezone:    "America/Denver",
-			wantStart:   "2025-12-08",
-			wantEnd:     "2025-12-14",
+			wantStart:   "2025-12-07",
+			wantEnd:     "2025-12-13",
 			wantErr:     false,
 		},
 		{
-			name:        "Thursday - should return last week Monday to Sunday",
+			name:        "Thursday - should return last pay period Sunday to Saturday",
 			currentDate: "2025-12-18", // Thursday
 			timezone:    "America/Denver",
-			wantStart:   "2025-12-08",
-			wantEnd:     "2025-12-14",
+			wantStart:   "2025-12-07",
+			wantEnd:     "2025-12-13",
 			wantErr:     false,
 		},
 		{
-			name:        "Friday - should return last week Monday to Sunday",
+			name:        "Friday - should return last pay period Sunday to Saturday",
 			currentDate: "2025-12-19", // Friday
 			timezone:    "America/Denver",
-			wantStart:   "2025-12-08",
-			wantEnd:     "2025-12-14",
+			wantStart:   "2025-12-07",
+			wantEnd:     "2025-12-13",
 			wantErr:     false,
 		},
 		{
-			name:        "Saturday - should return last week Monday to Sunday",
+			name:        "Saturday - should return last pay period Sunday to Saturday",
 			currentDate: "2025-12-20", // Saturday
 			timezone:    "America/Denver",
-			wantStart:   "2025-12-08",
-			wantEnd:     "2025-12-14",
+			wantStart:   "2025-12-07",
+			wantEnd:     "2025-12-13",
 			wantErr:     false,
 		},
 		{
-			name:        "Sunday - should return last week Monday to Sunday",
+			name:        "Sunday - should return last pay period Sunday to Saturday",
 			currentDate: "2025-12-21", // Sunday
 			timezone:    "America/Denver",
-			wantStart:   "2025-12-08",
-			wantEnd:     "2025-12-14",
+			wantStart:   "2025-12-14",
+			wantEnd:     "2025-12-20",
 			wantErr:     false,
 		},
 		{
 			name:        "First Monday of year",
 			currentDate: "2026-01-05", // Monday
 			timezone:    "America/Denver",
-			wantStart:   "2025-12-22",
-			wantEnd:     "2025-12-28",
+			wantStart:   "2025-12-28",
+			wantEnd:     "2026-01-03",
 			wantErr:     false,
 		},
 		{
 			name:        "Year boundary - New Year's Day (Thursday)",
 			currentDate: "2026-01-01", // Thursday
 			timezone:    "America/Denver",
-			wantStart:   "2025-12-22",
-			wantEnd:     "2025-12-28",
+			wantStart:   "2025-12-21",
+			wantEnd:     "2025-12-27",
 			wantErr:     false,
 		},
 		{
@@ -98,26 +98,42 @@ func TestCalculateLastWeekDates(t *testing.T) {
 			name:        "Different timezone - UTC",
 			currentDate: "2025-12-15", // Monday
 			timezone:    "UTC",
-			wantStart:   "2025-12-08",
-			wantEnd:     "2025-12-14",
+			wantStart:   "2025-12-07",
+			wantEnd:     "2025-12-13",
 			wantErr:     false,
 		},
 		{
 			name:        "Different timezone - America/New_York",
 			currentDate: "2025-12-15", // Monday
 			timezone:    "America/New_York",
-			wantStart:   "2025-12-01",
-			wantEnd:     "2025-12-07",
+			wantStart:   "2025-12-07",
+			wantEnd:     "2025-12-13",
 			wantErr:     false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Parse the test date
-			testDate, err := time.Parse("2006-01-02", tt.currentDate)
-			if err != nil {
-				t.Fatalf("Failed to parse test date: %v", err)
+			// Construct a time that is definitively on the given local date in the requested timezone.
+			// Using date-only parsing in UTC can shift the local date backwards for US timezones.
+			var testDate time.Time
+			if tt.timezone != "" {
+				loc, locErr := time.LoadLocation(tt.timezone)
+				if locErr == nil {
+					dateOnly, parseErr := time.ParseInLocation("2006-01-02", tt.currentDate, loc)
+					if parseErr != nil {
+						t.Fatalf("Failed to parse test date in location: %v", parseErr)
+					}
+					// Midday avoids DST/offset edge cases around local midnight.
+					testDate = dateOnly.Add(12 * time.Hour)
+				} else {
+					// For invalid timezone tests, fall back to a stable UTC value.
+					dateOnly, parseErr := time.Parse("2006-01-02", tt.currentDate)
+					if parseErr != nil {
+						t.Fatalf("Failed to parse test date: %v", parseErr)
+					}
+					testDate = dateOnly.Add(12 * time.Hour)
+				}
 			}
 
 			// Call the function
@@ -152,14 +168,14 @@ func TestCalculateLastWeekDates(t *testing.T) {
 				t.Errorf("End date should be 6 days after start date, got %v days", daysDiff)
 			}
 
-			// Additional validation: start date should be a Monday
-			if startTime.Weekday() != time.Monday {
-				t.Errorf("Start date should be a Monday, got %v", startTime.Weekday())
+			// Additional validation: start date should be a Sunday
+			if startTime.Weekday() != time.Sunday {
+				t.Errorf("Start date should be a Sunday, got %v", startTime.Weekday())
 			}
 
-			// Additional validation: end date should be a Sunday
-			if endTime.Weekday() != time.Sunday {
-				t.Errorf("End date should be a Sunday, got %v", endTime.Weekday())
+			// Additional validation: end date should be a Saturday
+			if endTime.Weekday() != time.Saturday {
+				t.Errorf("End date should be a Saturday, got %v", endTime.Weekday())
 			}
 		})
 	}
@@ -186,25 +202,48 @@ func TestCalculateLastWeekDates_ConsistentResults(t *testing.T) {
 }
 
 func TestCalculateLastWeekDates_TimeOfDayDoesNotMatter(t *testing.T) {
-	// Test that the time of day doesn't affect the result (only the date matters)
+	// Test that the time of day doesn't affect the result (only the *local date* matters)
 	date := "2025-12-15"
 	timezone := "America/Denver"
 
-	// Test at midnight
-	midnight, _ := time.Parse("2006-01-02 15:04:05", date+" 00:00:00")
-	startMidnight, endMidnight, err := calculateLastWeekDates(midnight, timezone)
+	loc, err := time.LoadLocation(timezone)
 	if err != nil {
-		t.Fatalf("Unexpected error at midnight: %v", err)
+		t.Fatalf("Failed to load timezone: %v", err)
 	}
 
-	// Verify the function returns valid Monday-Sunday pairs
-	startT, _ := time.Parse("2006-01-02", startMidnight)
-	endT, _ := time.Parse("2006-01-02", endMidnight)
-
-	if startT.Weekday() != time.Monday {
-		t.Errorf("Start date should be Monday, got %v", startT.Weekday())
+	dateOnly, err := time.ParseInLocation("2006-01-02", date, loc)
+	if err != nil {
+		t.Fatalf("Failed to parse date in location: %v", err)
 	}
-	if endT.Weekday() != time.Sunday {
-		t.Errorf("End date should be Sunday, got %v", endT.Weekday())
+
+	// Same local date, different local times
+	localEarly := dateOnly.Add(1 * time.Hour)
+	localLate := dateOnly.Add(23 * time.Hour)
+
+	startEarly, endEarly, err := calculateLastWeekDates(localEarly, timezone)
+	if err != nil {
+		t.Fatalf("Unexpected error for early time: %v", err)
+	}
+
+	startLate, endLate, err := calculateLastWeekDates(localLate, timezone)
+	if err != nil {
+		t.Fatalf("Unexpected error for late time: %v", err)
+	}
+
+	if startEarly != startLate {
+		t.Errorf("Start date should not depend on time of day: %v != %v", startEarly, startLate)
+	}
+	if endEarly != endLate {
+		t.Errorf("End date should not depend on time of day: %v != %v", endEarly, endLate)
+	}
+
+	// Verify returned range is Sunday-Saturday
+	startT, _ := time.Parse("2006-01-02", startEarly)
+	endT, _ := time.Parse("2006-01-02", endEarly)
+	if startT.Weekday() != time.Sunday {
+		t.Errorf("Start date should be Sunday, got %v", startT.Weekday())
+	}
+	if endT.Weekday() != time.Saturday {
+		t.Errorf("End date should be Saturday, got %v", endT.Weekday())
 	}
 }

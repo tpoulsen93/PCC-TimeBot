@@ -28,6 +28,27 @@ type TimeCard struct {
 	PayDay     time.Time           // Expected payday
 }
 
+// computePayday returns the payday for a given pay period end date.
+// Historically, PCC payroll is paid on the *second Friday* after the pay period ends.
+// This keeps payday on a Friday regardless of whether the pay period ends on Saturday or Sunday.
+func computePayday(periodEnd time.Time) time.Time {
+	// Normalize to a date-only value in the same location.
+	endDate := time.Date(periodEnd.Year(), periodEnd.Month(), periodEnd.Day(), 0, 0, 0, 0, periodEnd.Location())
+
+	// Days until the next Friday.
+	// If the period end date is already a Friday, the "next" Friday is the following week
+	// because payday is defined as the second Friday *after* the pay period ends.
+	// Go: Sunday=0 ... Saturday=6
+	daysUntilFriday := (int(time.Friday) - int(endDate.Weekday()) + 7) % 7
+	if daysUntilFriday == 0 {
+		daysUntilFriday = 7
+	}
+	firstFriday := endDate.AddDate(0, 0, daysUntilFriday)
+
+	// Payroll is on the second Friday after period end.
+	return firstFriday.AddDate(0, 0, 7)
+}
+
 // NewTimeCard creates a new time card for an employee covering the specified date range.
 // The date range is inclusive of both start and end dates.
 //
@@ -57,7 +78,7 @@ func NewTimeCard(id int, startDate, endDate string) (*TimeCard, error) {
 		ID:         id,
 		Days:       make(map[string]DayEntry),
 		TotalHours: 0,
-		PayDay:     end.AddDate(0, 0, 12), // 12 days after end date
+		PayDay:     computePayday(end),
 	}
 
 	// Initialize days map with zero hours for each day

@@ -9,7 +9,7 @@ import (
 	"github.com/tpoulsen/pcc-timebot/shared/database"
 )
 
-// calculateLastWeekDates calculates the Monday-Sunday date range for the previous week
+// calculateLastWeekDates calculates the Sunday-Saturday date range for the last completed pay period
 // based on the provided current time in the specified timezone.
 func calculateLastWeekDates(now time.Time, timezone string) (startDate, endDate string, err error) {
 	loc, err := time.LoadLocation(timezone)
@@ -19,19 +19,23 @@ func calculateLastWeekDates(now time.Time, timezone string) (startDate, endDate 
 
 	localNow := now.In(loc)
 
-	// Get the most recent Monday (could be today if today is Monday)
-	currentWeekday := int(localNow.Weekday())
-	daysToMonday := currentWeekday - 1 // Monday is 1
-	if currentWeekday == 0 {           // Sunday is 0
-		daysToMonday = 6
-	}
+	// IMPORTANT: Do not use Truncate(24h) to get "midnight".
+	// Truncate rounds relative to the Unix epoch (effectively UTC day boundaries),
+	// which can shift the local date backwards and cause off-by-one errors
+	// (e.g., returning Saturday instead of Sunday and making payday Thursday instead of Friday).
+	localDate := time.Date(localNow.Year(), localNow.Month(), localNow.Day(), 0, 0, 0, 0, loc)
 
-	// Last week's Monday is current Monday minus 7 days
-	lastMonday := localNow.AddDate(0, 0, -daysToMonday-7).Truncate(24 * time.Hour)
-	lastSunday := lastMonday.AddDate(0, 0, 6) // 6 days after Monday = Sunday
+	// We want the last *completed* Sunday-Saturday pay period.
+	// Find the start of the current pay period (most recent Sunday, possibly today).
+	currentWeekday := int(localDate.Weekday()) // Sunday=0 ... Saturday=6
+	currentPeriodStart := localDate.AddDate(0, 0, -currentWeekday)
 
-	startDate = lastMonday.Format("2006-01-02")
-	endDate = lastSunday.Format("2006-01-02")
+	// Last period is the 7 days immediately before the current period.
+	lastPeriodStart := currentPeriodStart.AddDate(0, 0, -7) // Sunday
+	lastPeriodEnd := lastPeriodStart.AddDate(0, 0, 6)       // Saturday
+
+	startDate = lastPeriodStart.Format("2006-01-02")
+	endDate = lastPeriodEnd.Format("2006-01-02")
 
 	return startDate, endDate, nil
 }
@@ -62,7 +66,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Calculate last week's Monday-Sunday
+	// Calculate last completed pay period (Sunday-Saturday)
 	startDate, endDate, err := calculateLastWeekDates(now, "America/Denver")
 	if err != nil {
 		fmt.Printf("Failed to calculate dates: %v\n", err)
