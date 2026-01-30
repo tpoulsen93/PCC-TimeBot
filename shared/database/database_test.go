@@ -78,8 +78,10 @@ func Test_GetEmployeeID(t *testing.T) {
 func Test_SubmitTime(t *testing.T) {
 	// Clean up any existing time entry for the test employee first
 	// Get today's date in Mountain Time (same as SubmitTime function)
+	// IMPORTANT: Use time.Date() instead of Truncate(24h) to avoid UTC day-shift bugs.
 	loc, _ := time.LoadLocation("America/Denver")
-	today := time.Now().In(loc).Truncate(24 * time.Hour)
+	now := time.Now().In(loc)
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, loc)
 
 	_, err := db.Exec("DELETE FROM payroll WHERE id = $1 AND date = $2", testID, today)
 	require.NoError(t, err)

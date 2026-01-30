@@ -175,9 +175,12 @@ func DuplicateSubmission(id int, date time.Time) (float64, error) {
 
 // SubmitTime adds a new time entry or updates an existing one
 func SubmitTime(id int, hours float64, message string, location string) (string, error) {
-	// Convert current time to Mountain Time (UTC-7)
+	// Get today's date in Mountain Time.
+	// IMPORTANT: Do not use Truncate(24h) — it truncates relative to UTC epoch,
+	// which can shift the local date backwards (e.g., Monday → Sunday).
 	loc, _ := time.LoadLocation("America/Denver")
-	today := time.Now().In(loc).Truncate(24 * time.Hour)
+	now := time.Now().In(loc)
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, loc)
 
 	// Check for duplicate submission
 	existingHours, err := DuplicateSubmission(id, today)
@@ -219,8 +222,12 @@ func AddTime(id int, date time.Time, hours float64, location string) (string, er
 		return "", err
 	}
 
+	// Get today's date in Mountain Time for the message.
+	// IMPORTANT: Do not use Truncate(24h) — it truncates relative to UTC epoch,
+	// which can shift the local date backwards (e.g., Monday → Sunday).
 	loc, _ := time.LoadLocation("America/Denver")
-	today := time.Now().In(loc).Truncate(24 * time.Hour)
+	now := time.Now().In(loc)
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, loc)
 
 	var message string
 	var result string

@@ -73,6 +73,9 @@ func SendTimeCards(startDateArg, endDateArg string, useLastPeriod bool) {
 	timeCards := make(map[int]*timecard.TimeCard)
 	var payday time.Time
 
+	// Load Denver timezone for converting stored UTC dates to local dates.
+	loc, _ := time.LoadLocation("America/Denver")
+
 	for _, entry := range entries {
 		tc, exists := timeCards[entry.EmployeeID]
 		if !exists {
@@ -87,7 +90,9 @@ func SendTimeCards(startDateArg, endDateArg string, useLastPeriod bool) {
 			}
 		}
 
-		if err := tc.AddHours(entry.Date.Format("2006-01-02"), entry.Time, entry.Location); err != nil {
+		// Convert the stored UTC date to Denver time to get the correct local date.
+		localDate := entry.Date.In(loc).Format("2006-01-02")
+		if err := tc.AddHours(localDate, entry.Time, entry.Location); err != nil {
 			fmt.Printf("Failed to add hours for employee %d: %v\n", entry.EmployeeID, err)
 		}
 	}
