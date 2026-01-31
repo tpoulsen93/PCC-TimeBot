@@ -8,15 +8,13 @@ import (
 	"os"
 	"strings"
 
-	"github.com/tpoulsen/pcc-timebot/internal/constants"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
 
 const (
 	// GlobalWage represents the standard hourly wage rate
-	// Deprecated: Use constants.DefaultWage instead
-	GlobalWage = constants.DefaultWage
+	GlobalWage = 30.0
 )
 
 var (

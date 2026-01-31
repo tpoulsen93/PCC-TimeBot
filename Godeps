@@ -1,8 +1,0 @@
-{
-  "ImportPath": "github.com/tpoulsen/pcc-timebot",
-  "GoVersion": "go1.24.2",
-  "Packages": [
-    "./cmd/timebot-service",
-    "./cmd/send-timecards"
-  ]
-}

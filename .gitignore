@@ -1,6 +1,15 @@
 # Go build artifacts
 /pcc-timebot
 /bin/
+# Service binaries
+timebot-service
+web-api
+add-time
+send-timecards
+update-employee
+timecard-scheduler
+*.exe
+*.dll
 
 # Environment files
 .env
