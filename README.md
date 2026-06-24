@@ -40,12 +40,31 @@ Optional (only if you want to run integration tests against Postgres):
    make test-all
    ```
 
-### Available Commands
+### Building
 
 ```bash
-make help           # Show all available commands
-make build-all       # Build the application binaries
-make test-all        # Run unit tests (no database required)
+go build -o bin/timebot-service ./cmd/timebot-service/
+```
+
+### CLI Usage
+
+The `timebot-service` binary serves as both the web server and the admin CLI, controlled by flags:
+
+```bash
+# Run the web server (used by Heroku via Procfile)
+bin/timebot-service -heroku
+
+# Manually add or update time for an employee (interactive prompts)
+bin/timebot-service -addTime
+
+# Update an employee record (interactive prompts)
+bin/timebot-service -updateEmployee
+
+# Send time cards for a specific pay period
+bin/timebot-service -sendTimeCards -startDate 2026-06-09 -endDate 2026-06-22
+
+# Send time cards using the last recorded period end date (auto-calculates next 7-day period)
+bin/timebot-service -sendTimeCards -useLastPeriod
 ```
 
 ### Project Structure

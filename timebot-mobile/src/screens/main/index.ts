@@ -1,1 +1,0 @@
-export { SubmitTimeScreen } from './SubmitTimeScreen';
