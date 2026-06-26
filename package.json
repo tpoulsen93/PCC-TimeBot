@@ -1,0 +1,18 @@
+{
+  "name": "pcc-timebot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Build orchestration for the PCC TimeBot web SPA. The Heroku Node.js buildpack runs heroku-postbuild to produce web/app/dist, which the Go buildpack then embeds into the web-api binary.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "install": "npm install --prefix web/app",
+    "dev": "npm run dev --prefix web/app",
+    "build": "npm install --prefix web/app && npm run build --prefix web/app",
+    "build:server": "go build -o bin/web-api ./cmd/web-api/",
+    "build:all": "npm run build && npm run build:server",
+    "start": "bin/web-api",
+    "heroku-postbuild": "npm run build"
+  }
+}

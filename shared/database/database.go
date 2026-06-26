@@ -19,6 +19,7 @@ type Employee struct {
 	Phone        string
 	Email        string
 	SupervisorID *int
+	IsAdmin      bool
 	Timestamp    time.Time
 }
 
@@ -134,7 +135,7 @@ func GetEmployee(id int) (*Employee, error) {
 	var phone, email sql.NullString
 
 	err := db.QueryRow(`
-		SELECT id, first_name, last_name, phone, email, supervisor_id, timestamp
+		SELECT id, first_name, last_name, phone, email, supervisor_id, is_admin, timestamp
 		FROM employees WHERE id = $1`,
 		id,
 	).Scan(
@@ -144,6 +145,7 @@ func GetEmployee(id int) (*Employee, error) {
 		&phone,
 		&email,
 		&employee.SupervisorID,
+		&employee.IsAdmin,
 		&employee.Timestamp,
 	)
 	if err != nil {
@@ -291,6 +293,18 @@ func AddEmployee(firstName, lastName string, email, phone string, superFirstName
 		helpers.Title.String(firstName), helpers.Title.String(lastName)), nil
 }
 
+// updatableEmployeeColumns maps user-facing field names to the actual database
+// column names that are allowed to be updated. Restricting updates to this set
+// prevents SQL injection via the field name and blocks tampering with sensitive
+// columns such as id or is_admin through the generic update path.
+var updatableEmployeeColumns = map[string]string{
+	"first_name":    "first_name",
+	"last_name":     "last_name",
+	"phone":         "phone",
+	"email":         "email",
+	"supervisor_id": "supervisor_id",
+}
+
 // UpdateEmployee updates an employee's information
 func UpdateEmployee(firstName, lastName, field, value string) error {
 	id, err := GetEmployeeID(firstName, lastName)
@@ -301,8 +315,21 @@ func UpdateEmployee(firstName, lastName, field, value string) error {
 		return fmt.Errorf("employee not found")
 	}
 
-	query := fmt.Sprintf("UPDATE employees SET %s = $1 WHERE id = $2", field)
-	_, err = db.Exec(query, value, id)
+	return UpdateEmployeeField(id, field, value)
+}
+
+// UpdateEmployeeField updates a single whitelisted column for an employee by ID.
+// The column name is validated against an allow-list and the value is always
+// passed as a bound parameter, so neither input can be used for SQL injection.
+func UpdateEmployeeField(id int, field, value string) error {
+	column, ok := updatableEmployeeColumns[strings.ToLower(field)]
+	if !ok {
+		return fmt.Errorf("invalid field: %s", field)
+	}
+
+	// Column name comes from a fixed allow-list, never from user input directly.
+	query := fmt.Sprintf("UPDATE employees SET %s = $1 WHERE id = $2", column)
+	_, err := db.Exec(query, value, id)
 	if err != nil {
 		return fmt.Errorf("failed to update employee: %w", err)
 	}

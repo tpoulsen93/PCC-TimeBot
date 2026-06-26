@@ -76,6 +76,68 @@ func connectSMTP(cfg *SMTPConfig, from, to string) (*smtp.Client, error) {
 	return c, nil
 }
 
+// SendLoginLink emails a magic-link sign-in URL to an employee.
+// The link is single-use and time-limited; this function only delivers it.
+func SendLoginLink(cfg *SMTPConfig, from, to, name, loginURL string, expiresMinutes int) error {
+	displayName := strings.TrimSpace(name)
+	if displayName == "" {
+		displayName = "there"
+	}
+
+	htmlBody := fmt.Sprintf(`<!DOCTYPE html>
+<html>
+<head>
+<style>
+body { font-family: Arial, sans-serif; margin: 0; padding: 24px; background: #f3f4f6; color: #111827; }
+.card { max-width: 480px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 32px; }
+.btn { display: inline-block; padding: 14px 24px; background: #4f46e5; color: #ffffff !important;
+       text-decoration: none; border-radius: 10px; font-weight: 600; }
+.muted { color: #6b7280; font-size: 13px; line-height: 1.5; }
+.link { word-break: break-all; color: #4f46e5; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2>PCC TimeBot sign-in</h2>
+  <p>Hi %s,</p>
+  <p>Click the button below to sign in. This link expires in %d minutes and can only be used once.</p>
+  <p style="margin: 24px 0;"><a class="btn" href="%s">Sign in to PCC TimeBot</a></p>
+  <p class="muted">If the button doesn't work, copy and paste this URL into your browser:</p>
+  <p class="link">%s</p>
+  <p class="muted">If you didn't request this, you can safely ignore this email.</p>
+</div>
+</body>
+</html>`, displayName, expiresMinutes, loginURL, loginURL)
+
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("From: PCC TimeBot <%s>\r\n", from))
+	buf.WriteString(fmt.Sprintf("To: %s\r\n", to))
+	buf.WriteString("Subject: Your PCC TimeBot sign-in link\r\n")
+	buf.WriteString("MIME-Version: 1.0\r\n")
+	buf.WriteString("Content-Type: text/html; charset=UTF-8\r\n")
+	buf.WriteString("\r\n")
+	buf.WriteString(htmlBody)
+
+	c, err := connectSMTP(cfg, from, to)
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+
+	w, err := c.Data()
+	if err != nil {
+		return fmt.Errorf("failed to create message writer: %w", err)
+	}
+	if _, err = w.Write(buf.Bytes()); err != nil {
+		return fmt.Errorf("failed to write message: %w", err)
+	}
+	if err = w.Close(); err != nil {
+		return fmt.Errorf("failed to close writer: %w", err)
+	}
+
+	return c.Quit()
+}
+
 // SendTimeCard sends a time card via email as HTML
 func SendTimeCard(cfg *SMTPConfig, from, to, name string, htmlBody string, payday time.Time) error {
 	var buf bytes.Buffer

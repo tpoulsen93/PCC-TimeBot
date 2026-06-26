@@ -1,27 +1,25 @@
 # PCC-TimeBot
 
-A Go-based payroll management application for Poulsen Concrete Company, enabling employees to submit time entries and supervisors to manage payroll data.
+A payroll management application for Poulsen Concrete Company. A React single-page
+app lets employees submit time entries and lets admins manage payroll, backed by a
+secured Go JSON API. The compiled SPA is embedded into the Go binary and served
+same-origin in production.
 
 ## Features
 
-- Employee time entry submission
-- Supervisor payroll management
+- Mobile-friendly web app for time entry submission
+- Passwordless sign-in via email magic links (no passwords)
+- Admin dashboard for employee and timecard management
 - Email notifications for time card submissions
-- SMS notifications for reminders
-- Administrative functions for employee management
-- PostgreSQL database for data persistence
+- Admin-provisioned accounts (no public signup)
+- PostgreSQL for persistence
 
-## Development
+## Prerequisites
 
-### Prerequisites
+- Go 1.24+
+- Node.js 20+ and npm
 
-- Go (see `go.mod` for the version)
-
-Optional (only if you want to run integration tests against Postgres):
-
-- PostgreSQL
-
-### Getting Started
+## Getting Started
 
 1. **Clone the repository**
 
@@ -32,104 +30,145 @@ Optional (only if you want to run integration tests against Postgres):
 
 2. **Set up environment variables**
 
-   Copy `.env.example` to `.env` and edit values as needed.
-
-3. **Run tests**
-
    ```bash
-   make test-all
+   cp .env.example .env
+   # edit .env with real values
    ```
 
-### Building
+3. **Initialize the database**
+
+   ```bash
+   psql "$DATABASE_URL" -f scripts/init-db.sql
+   ```
+
+4. **Build the SPA and server**
+
+   ```bash
+   npm run build
+   go build -o bin/web-api ./cmd/web-api/
+   ```
+
+5. **Create the first admin** (accounts are admin-provisioned; no public signup)
+
+   ```bash
+   go run ./cmd/bootstrap-admin -first Jane -last Doe -email "$ADMIN_EMAIL"
+   ```
+
+6. **Run the server**
+
+   ```bash
+   bin/web-api
+   # App is at http://localhost:$PORT (default 8080)
+   ```
+
+   The server auto-loads `.env` if present. On Heroku, the file won't exist and
+   config vars are injected by the platform instead.
+
+## Local Development with Hot Reload
+
+Run the Go API and the Vite dev server in separate terminals:
 
 ```bash
-go build -o bin/timebot-service ./cmd/timebot-service/
+# Terminal 1 – start Go API (auto-loads .env)
+bin/web-api
+
+# Terminal 2 – Vite dev server with hot reload, proxies /api to Go
+npm run dev
+# App is at http://localhost:5173
 ```
 
-### CLI Usage
+When running Vite separately, uncomment `CORS_ALLOWED_ORIGINS` in `.env.local`
+so the Go server accepts requests from the Vite origin.
 
-The `timebot-service` binary serves as both the web server and the admin CLI, controlled by flags:
+## Dev Login (local testing only)
+
+When `APP_ENV=dev`, submitting the login form skips the email entirely
+and logs you in immediately. Just type your email and hit **Send sign-in link** —
+no email, no curl, no browser console needed.
+
+This behaviour is **not active in production** (`APP_ENV=prod`).
+
+## Testing
 
 ```bash
-# Run the web server (used by Heroku via Procfile)
-bin/timebot-service -heroku
+go test ./...
+```
 
-# Manually add or update time for an employee (interactive prompts)
-bin/timebot-service -addTime
+All tests are unit tests — no database required.
+
+## Admin CLI
+
+`timebot-service` is an admin-only CLI for operations that don't fit in the web UI:
+
+```bash
+# Manually add time for an employee (interactive prompts)
+go run ./cmd/timebot-service -addTime
 
 # Update an employee record (interactive prompts)
-bin/timebot-service -updateEmployee
+go run ./cmd/timebot-service -updateEmployee
 
-# Send time cards for a specific pay period
-bin/timebot-service -sendTimeCards -startDate 2026-06-09 -endDate 2026-06-22
+# Send time cards for a pay period
+go run ./cmd/timebot-service -sendTimeCards -startDate 2026-06-09 -endDate 2026-06-22
 
-# Send time cards using the last recorded period end date (auto-calculates next 7-day period)
-bin/timebot-service -sendTimeCards -useLastPeriod
+# Send time cards using the last recorded period end date
+go run ./cmd/timebot-service -sendTimeCards -useLastPeriod
 ```
 
-### Project Structure
+## Project Structure
 
 ```
-├── cmd/                # Binaries (CLIs + services)
-├── internal/           # App internals (handlers, admin, email, middleware)
-├── shared/             # Shared packages (database, timecard, helpers, etc.)
-├── services/           # Dockerfiles for services (optional)
-└── timebot-mobile/     # Mobile app
+├── cmd/
+│   ├── web-api/            # Production HTTP server (JSON API + embedded SPA)
+│   ├── bootstrap-admin/    # Seed/promote the first admin employee
+│   ├── timebot-service/    # Admin CLI (add time, send timecards, etc.)
+│   └── ...                 # Other admin CLIs (add-time, update-employee, etc.)
+├── internal/
+│   ├── auth/               # Magic-link tokens, session middleware
+│   ├── handlers/           # HTTP handlers (auth, timecards, admin)
+│   ├── admin/              # Business logic for timecard building/sending
+│   ├── email/              # SMTP helpers including magic-link email
+│   └── middleware/         # CORS, request logger
+├── shared/
+│   ├── database/           # DB access layer (employees, sessions, payroll)
+│   ├── timecalc/           # Hours calculation
+│   ├── timecard/           # Timecard model and HTML rendering
+│   └── helpers/            # Shared utilities
+├── web/
+│   ├── embed.go            # go:embed declaration for app/dist
+│   └── app/                # Vite + React + TypeScript SPA
+│       └── src/            # App source (pages, components, API client)
+└── scripts/
+    └── init-db.sql         # Full schema (run this to (re)initialize the DB)
 ```
 
-### Testing
+## Deployment (Heroku)
 
-The project includes comprehensive tests for all major components:
+Configured in `app.json` using two buildpacks:
 
-```bash
-# Run all tests
-make test
+1. `heroku/nodejs` — runs `heroku-postbuild`, which builds the SPA into `web/app/dist`
+2. `heroku/go` — builds `./cmd/web-api`, embedding `web/app/dist` into the binary
 
-# Run specific test packages
-go test ./src/database
-go test ./src/admin
-go test ./src/timecard
-```
+`Procfile` runs `web: bin/web-api`. One binary serves the API (`/api/v1`) and the SPA.
 
-By default, `go test ./...` / `make test-all` runs unit tests only (no database required).
+**Required environment variables on Heroku:**
 
-Database-backed tests are marked as integration tests and can be run explicitly with:
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string (Heroku Postgres add-on) |
+| `SMTP_USERNAME` | SMTP username (also receives payroll summaries) |
+| `SMTP_PASSWORD` | SMTP password |
+| `APP_BASE_URL` | Public app URL, used to build magic-link URLs |
+| `APP_ENV` | Set to `prod` (enables `Secure` cookies) |
 
-```bash
-go test -tags=integration ./...
-```
+**Optional / reserved environment variables:**
 
-### Database
+| Variable | Description |
+|---|---|
+| `CORS_ALLOWED_ORIGINS` | Local development only, when the SPA is served from a different origin such as Vite |
+| `TWILIO_ACCOUNT_SID` | Reserved for future supervisor SMS notifications on time submission |
+| `TWILIO_AUTH_TOKEN` | Reserved for future supervisor SMS notifications on time submission |
+| `TWILIO_PHONE_NUMBER` | Reserved sender number for future supervisor SMS notifications |
 
-The application uses PostgreSQL for persistence in production (e.g. Heroku Postgres).
-Local Postgres is only required if you want to run the integration tests.
+Twilio is intentionally **not wired into the current web submission flow on this branch**,
+but the placeholders remain so the future SMS notification work has a clear home.
 
-## Deployment
-
-The application is designed to be deployed as a single binary:
-
-```bash
-# Build for production
-make build
-
-# The binary will be created as ./pcc-timebot
-```
-
-## Environment Variables
-
-Key environment variables:
-
-- `DATABASE_URL`: PostgreSQL connection string
-- `SMTP_USERNAME`: Email service username
-- `SMTP_PASSWORD`: Email service password
-- `TWILIO_ACCOUNT_SID`: Twilio account SID for SMS
-- `TWILIO_AUTH_TOKEN`: Twilio auth token
-- `PORT`: Application port (default: 8080)
-
-## Contributing
-
-1. Make changes in the dev container environment
-2. Run tests to ensure functionality
-3. Follow Go formatting standards (`make format`)
-4. Ensure code passes linting (`make lint`)
-5. Submit pull requests for review

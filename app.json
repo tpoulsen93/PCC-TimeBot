@@ -1,0 +1,34 @@
+{
+  "name": "PCC TimeBot",
+  "description": "Time submission web app (React SPA + Go API) with email magic-link auth.",
+  "buildpacks": [
+    { "url": "heroku/nodejs" },
+    { "url": "heroku/go" }
+  ],
+  "env": {
+    "DATABASE_URL": {
+      "description": "PostgreSQL connection string (provided by Heroku Postgres).",
+      "required": true
+    },
+    "SMTP_USERNAME": {
+      "description": "SMTP account username used to send timecard and sign-in emails.",
+      "required": true
+    },
+    "SMTP_PASSWORD": {
+      "description": "SMTP account password.",
+      "required": true
+    },
+    "APP_BASE_URL": {
+      "description": "Public base URL of the app, used to build magic-link URLs (e.g. https://your-app.herokuapp.com).",
+      "required": true
+    },
+    "APP_ENV": {
+      "description": "Set to 'prod' on Heroku. Use 'dev' locally to disable Secure cookies.",
+      "value": "prod"
+    },
+    "CORS_ALLOWED_ORIGINS": {
+      "description": "Comma-separated list of allowed CORS origins. Only needed when the SPA is served from a different origin (local dev). Leave empty in production since the SPA is same-origin.",
+      "required": false
+    }
+  }
+}

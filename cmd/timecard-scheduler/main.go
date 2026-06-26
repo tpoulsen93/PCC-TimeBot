@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/tpoulsen/pcc-timebot/internal/admin"
 	"github.com/tpoulsen/pcc-timebot/shared/database"
 )
@@ -41,6 +42,8 @@ func calculateLastWeekDates(now time.Time, timezone string) (startDate, endDate 
 }
 
 func main() {
+	_ = godotenv.Overload()
+
 	fmt.Println("Starting timecard scheduler...")
 
 	// Check if today is Monday

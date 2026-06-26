@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/tpoulsen/pcc-timebot/internal/admin"
 )
 
 func main() {
+	_ = godotenv.Overload()
+
 	// Define command line flags
 	var (
 		startDate     = flag.String("start", "", "Pay period start date (YYYY-MM-DD)")

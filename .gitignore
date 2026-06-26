@@ -28,5 +28,10 @@ coverage.html
 # Editor files
 .vscode/
 
+# Node / web SPA
+node_modules/
+web/app/dist/*
+!web/app/dist/.gitkeep
+
 # Temporary files
 /tmp/

@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/api.ts","./src/auth.tsx","./src/main.tsx","./src/timecalc.ts","./src/types.ts","./src/vite-env.d.ts","./src/components/layout.tsx","./src/components/protected.tsx","./src/pages/adminpage.tsx","./src/pages/historypage.tsx","./src/pages/loginpage.tsx","./src/pages/submitpage.tsx","./src/pages/timecardpage.tsx"],"version":"5.9.3"}

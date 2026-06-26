@@ -5,10 +5,13 @@ import (
 	"log"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/tpoulsen/pcc-timebot/internal/admin"
 )
 
 func main() {
+	_ = godotenv.Overload()
+
 	if err := admin.AddTime(); err != nil {
 		log.Fatalf("Error adding time: %v", err)
 		os.Exit(1)
