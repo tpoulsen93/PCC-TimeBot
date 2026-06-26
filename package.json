@@ -9,7 +9,7 @@
   "scripts": {
     "install": "npm install --prefix web/app",
     "dev": "npm run dev --prefix web/app",
-    "build": "npm install --prefix web/app && npm run build --prefix web/app",
+    "build": "npm install --include=dev --prefix web/app && npm run build --prefix web/app",
     "build:server": "go build -o bin/web-api ./cmd/web-api/",
     "build:all": "npm run build && npm run build:server",
     "start": "bin/web-api",
