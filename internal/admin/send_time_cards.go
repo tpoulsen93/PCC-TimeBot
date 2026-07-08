@@ -145,6 +145,8 @@ func SendTimeCards(startDateArg, endDateArg string, useLastPeriod bool) {
 
 	if len(recipients) == 0 {
 		fmt.Println("Warning: neither ADMIN_EMAIL nor BOOKKEEPER_EMAIL is set; skipping summary email.")
+	} else {
+		email.PrintPayrollSummary(timeCards, start, end, payday)
 	}
 
 	for _, recipient := range recipients {

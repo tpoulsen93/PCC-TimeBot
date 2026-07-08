@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tpoulsen/pcc-timebot/shared/helpers"
 	"github.com/tpoulsen/pcc-timebot/shared/timecard"
 )
 
@@ -116,6 +115,33 @@ func SendTimeCard(cfg *SMTPConfig, from, to, name string, htmlBody string, payda
 	return c.Quit()
 }
 
+// PrintPayrollSummary prints the payroll summary to stdout.
+func PrintPayrollSummary(timeCards map[int]*timecard.TimeCard, startDate, endDate, payday time.Time) {
+	ids := make([]int, 0, len(timeCards))
+	for id := range timeCards {
+		ids = append(ids, id)
+	}
+	sort.Ints(ids)
+
+	var hoursSum float64
+	for _, id := range ids {
+		if tc := timeCards[id]; tc != nil {
+			hoursSum += tc.TotalHours
+		}
+	}
+
+	fmt.Printf("\nPayroll Summary for %s to %s\n", startDate.Format("2006-01-02"), endDate.Format("2006-01-02"))
+	fmt.Printf("Payday: %s\n\n", payday.Format("2006-01-02"))
+	fmt.Printf("%-30s %s\n", "Employee", "Hours")
+	fmt.Printf("%s %s\n", strings.Repeat("-", 30), strings.Repeat("-", 10))
+	for _, id := range ids {
+		if tc := timeCards[id]; tc != nil {
+			fmt.Printf("%-30s %7.2f\n", tc.Name, tc.TotalHours)
+		}
+	}
+	fmt.Printf("\n%-30s %7.2f\n\n", "Total Hours:", hoursSum)
+}
+
 // SendPayrollSummary sends a summary of all time cards to the admin
 func SendPayrollSummary(cfg *SMTPConfig, from, to string, timeCards map[int]*timecard.TimeCard, startDate, endDate, payday time.Time) error {
 	var body strings.Builder
@@ -136,35 +162,17 @@ func SendPayrollSummary(cfg *SMTPConfig, from, to string, timeCards map[int]*tim
 	}
 	sort.Ints(ids)
 
-	var hoursSum, costSum float64
+	var hoursSum float64
 	for _, id := range ids {
 		tc := timeCards[id]
 		if tc == nil {
 			continue
 		}
 		hoursSum += tc.TotalHours
-		costSum += tc.TotalHours * helpers.GlobalWage
 		body.WriteString(fmt.Sprintf("%s  -->  %.2f\n", tc.Name, tc.TotalHours))
 	}
 
 	body.WriteString(fmt.Sprintf("\nTotal Hours  -->  %.2f\n", hoursSum))
-	body.WriteString(fmt.Sprintf("Estimated Total Cost  -->  $%.2f\n", costSum))
-
-	// Print the summary to standard output
-	fmt.Printf("\nPayroll Summary for %s to %s\n", startDate.Format("2006-01-02"), endDate.Format("2006-01-02"))
-	fmt.Printf("Payday: %s\n\n", payday.Format("2006-01-02"))
-	fmt.Printf("%-30s %s\n", "Employee", "Hours")
-	fmt.Printf("%s %s\n", strings.Repeat("-", 30), strings.Repeat("-", 10))
-
-	for _, id := range ids {
-		tc := timeCards[id]
-		if tc == nil {
-			continue
-		}
-		fmt.Printf("%-30s %7.2f\n", tc.Name, tc.TotalHours)
-	}
-	fmt.Printf("\n%-30s %7.2f\n", "Total Hours:", hoursSum)
-	fmt.Printf("%-30s $%7.2f\n\n", "Estimated Total Cost:", costSum)
 
 	// Connect to SMTP server and send email
 	c, err := connectSMTP(cfg, from, to)

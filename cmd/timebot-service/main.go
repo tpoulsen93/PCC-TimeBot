@@ -16,6 +16,8 @@ import (
 	"github.com/tpoulsen/pcc-timebot/shared/helpers"
 	"github.com/tpoulsen/pcc-timebot/shared/timecalc"
 
+	"github.com/joho/godotenv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/twilio/twilio-go"
 	"github.com/twilio/twilio-go/client"
@@ -28,6 +30,7 @@ type TwiMLResponse struct {
 }
 
 func main() {
+	_ = godotenv.Overload()
 	// If the heroku flag is set, run the server on Heroku
 	heroku := flag.Bool("heroku", false, "Run on Heroku")
 
@@ -254,6 +257,9 @@ func processTime(message, from string) (string, error) {
 	}
 	if len(parts) > 7 {
 		return "Error. Time formatted incorrectly. Too many parameters.", nil
+	}
+	if location == "" {
+		return "Error. Location is required. Wrap it in quotes: \"Job Site Name\"", nil
 	}
 
 	// Get employee ID

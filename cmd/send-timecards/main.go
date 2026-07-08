@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/tpoulsen/pcc-timebot/internal/admin"
 )
 
@@ -35,6 +36,7 @@ func main() {
 	}
 
 	// Parse command line flags
+	_ = godotenv.Overload()
 	flag.Parse()
 
 	// Show help if requested
