@@ -34,18 +34,13 @@ func main() {
 	// If the heroku flag is set, run the server on Heroku
 	heroku := flag.Bool("heroku", false, "Run on Heroku")
 
-	// if the addTime flag is set, run the addTime function
-	addTime := flag.Bool("addTime", false, "Run AddTime")
-	// if the updateEmployee flag is set, run the updateEmployee function
-	updateEmployee := flag.Bool("updateEmployee", false, "Run UpdateEmployee")
-	// if the sendTimeCards flag is set, run the sendTimeCards function
-	sendTimeCards := flag.Bool("sendTimeCards", false, "Run SendTimeCards")
-	// optional start date for sendTimeCards
+	addEmployee := flag.Bool("addEmployee", false, "Add a new employee (interactive)")
+	addTime := flag.Bool("addTime", false, "Add or correct time for an employee (interactive)")
+	updateEmployee := flag.Bool("updateEmployee", false, "Update an employee record field (interactive)")
+	sendTimeCards := flag.Bool("sendTimeCards", false, "Send time cards and payroll summary")
 	startDate := flag.String("startDate", "", "Pay period start date (YYYY-MM-DD)")
-	// optional end date for sendTimeCards
 	endDate := flag.String("endDate", "", "Pay period end date (YYYY-MM-DD)")
-	// optional flag to use last period's end date and calculate next 7-day period
-	useLastPeriod := flag.Bool("useLastPeriod", false, "Use last period's end date to calculate next 7-day period")
+	useLastPeriod := flag.Bool("useLastPeriod", false, "Use last period's end date to calculate the next 7-day period")
 
 	flag.Parse()
 
@@ -59,18 +54,25 @@ func main() {
 
 	fmt.Println("Running as admin")
 	switch {
+	case *addEmployee:
+		if err := admin.AddEmployee(); err != nil {
+			fmt.Printf("Error: %v\n", err)
+		}
 	case *addTime:
-		fmt.Println("Running AddTime...")
-		admin.AddTime()
+		if err := admin.AddTime(); err != nil {
+			fmt.Printf("Error: %v\n", err)
+		}
 	case *updateEmployee:
-		fmt.Println("Running UpdateEmployee...")
 		admin.UpdateEmployee()
 	case *sendTimeCards:
-		fmt.Println("Running SendTimeCards...")
 		admin.SendTimeCards(*startDate, *endDate, *useLastPeriod)
 	default:
-		fmt.Println("No valid command provided. Use -addTime, -updateEmployee, or -sendTimeCards.")
-		fmt.Println("For -sendTimeCards, you can optionally provide -startDate and -endDate (YYYY-MM-DD), or use -useLastPeriod to calculate the next 7-day period from the last used end date.")
+		fmt.Println("No command provided. Available flags:")
+		fmt.Println("  -heroku          Run the SMS webhook server")
+		fmt.Println("  -addEmployee     Add a new employee")
+		fmt.Println("  -addTime         Add or correct time for an employee")
+		fmt.Println("  -updateEmployee  Update an employee record field")
+		fmt.Println("  -sendTimeCards   Send time cards (use with -startDate/-endDate or -useLastPeriod)")
 	}
 }
 
