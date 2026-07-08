@@ -1,9 +1,7 @@
 package admin
 
 import (
-	"database/sql"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/tpoulsen/pcc-timebot/shared/database"
@@ -11,34 +9,36 @@ import (
 )
 
 func UpdateEmployee() {
-	// Get database connection string from environment
-	dbURL := os.Getenv("DATABASE_URL")
-	if dbURL == "" {
-		fmt.Println("DATABASE_URL environment variable not set")
-		os.Exit(1)
+	if err := database.Initialize(); err != nil {
+		fmt.Printf("Failed to connect to database: %v\n", err)
+		return
 	}
 
-	// Connect to database
-	db, err := sql.Open("postgres", dbURL)
-	if err != nil {
-		fmt.Printf("Error connecting to database: %v\n", err)
-		os.Exit(1)
+	first := helpers.GetUserInput("Employee first name:             ")
+	last := helpers.GetUserInput("Employee last name:              ")
+	target := helpers.GetUserInput("Field to update (first_name | last_name | email | phone | supervisor_id): ")
+
+	var value string
+	if strings.ToLower(strings.TrimSpace(target)) == "phone" {
+		for {
+			raw := helpers.GetUserInput("New phone (10 digits, e.g. 3035551234): ")
+			normalized, err := normalizePhone(raw)
+			if err != nil {
+				fmt.Printf("Invalid phone: %v. Please try again.\n", err)
+				continue
+			}
+			value = normalized
+			break
+		}
+	} else {
+		value = helpers.GetUserInput("New value:                       ")
 	}
-	defer db.Close()
 
-	// Get user input
-	first := helpers.GetUserInput("Enter employee first name:       ")
-	last := helpers.GetUserInput("Enter employee last name:        ")
-	target := helpers.GetUserInput("Enter target: <email | phone | supervisor_id> ")
-	value := helpers.GetUserInput("Enter new value:                 ")
-
-	// Print confirmation
 	fmt.Printf("\nname:   %s %s\n", helpers.Title.String(first), helpers.Title.String(last))
-	fmt.Printf("target: %s\n", target)
+	fmt.Printf("field:  %s\n", target)
 	fmt.Printf("value:  %s\n\n", value)
 
-	// Confirm submission
-	confirm := helpers.GetUserInput("Submit? (y/n)   ")
+	confirm := helpers.GetUserInput("Submit? (y/n): ")
 	fmt.Println()
 
 	if strings.HasPrefix(strings.ToLower(confirm), "y") {
@@ -47,9 +47,9 @@ func UpdateEmployee() {
 			fmt.Printf("Error: %v\n", err)
 			return
 		}
-		fmt.Printf("%s %s's %s was changed to %s\n",
+		fmt.Printf("%s %s's %s updated to %s\n",
 			helpers.Title.String(first), helpers.Title.String(last), target, value)
 	} else {
-		fmt.Println("Cancelled. See you in the next life...")
+		fmt.Println("Cancelled.")
 	}
 }

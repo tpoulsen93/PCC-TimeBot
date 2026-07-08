@@ -124,33 +124,40 @@ func SendTimeCards(startDateArg, endDateArg string, useLastPeriod bool) {
 		}
 	}
 
-	// Send summary to admin
-	fmt.Println("Sending payroll totals to admin...")
-	adminID, err := database.GetEmployeeID("taylor", "poulsen")
-	if err != nil {
-		fmt.Printf("Failed to get admin ID: %v\n", err)
-		os.Exit(1)
+	// Send summary to admin and bookkeeper
+	recipients := []string{}
+	if adminEmail := os.Getenv("ADMIN_EMAIL"); adminEmail != "" {
+		recipients = append(recipients, adminEmail)
 	}
-	if adminID == 0 {
-		fmt.Println("Admin not found in database")
-		os.Exit(1)
+	if bkEmail := os.Getenv("BOOKKEEPER_EMAIL"); bkEmail != "" {
+		// Avoid duplicate if admin and bookkeeper are the same address.
+		isDupe := false
+		for _, r := range recipients {
+			if strings.EqualFold(r, bkEmail) {
+				isDupe = true
+				break
+			}
+		}
+		if !isDupe {
+			recipients = append(recipients, bkEmail)
+		}
 	}
 
-	adminEmail, err := database.GetEmployeeEmail(adminID)
-	if err != nil {
-		fmt.Printf("Failed to get admin email: %v\n", err)
-		os.Exit(1)
+	if len(recipients) == 0 {
+		fmt.Println("Warning: neither ADMIN_EMAIL nor BOOKKEEPER_EMAIL is set; skipping summary email.")
 	}
 
-	if err := email.SendPayrollSummary(smtpConfig,
-		smtpConfig.Username,
-		adminEmail,
-		timeCards,
-		start,
-		end,
-		payday); err != nil {
-		fmt.Printf("Failed to send payroll summary: %v\n", err)
-		os.Exit(1)
+	for _, recipient := range recipients {
+		fmt.Printf("Sending payroll summary to %s...\n", recipient)
+		if err := email.SendPayrollSummary(smtpConfig,
+			smtpConfig.Username,
+			recipient,
+			timeCards,
+			start,
+			end,
+			payday); err != nil {
+			fmt.Printf("Failed to send payroll summary to %s: %v\n", recipient, err)
+		}
 	}
 
 	fmt.Println("Mission accomplished")

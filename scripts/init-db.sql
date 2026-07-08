@@ -1,7 +1,8 @@
--- Reset script: drops tables from wrong project and creates correct schema
--- Run via: heroku pg:psql -a pcc-time-bot < scripts/init-db.sql
+-- PCC-TimeBot schema (SMS/Twilio version)
+-- Run via: psql "$DATABASE_URL" -f scripts/init-db.sql
 
--- Drop tables from the wrong project (CASCADE handles any FK dependencies)
+DROP TABLE IF EXISTS sessions CASCADE;
+DROP TABLE IF EXISTS login_tokens CASCADE;
 DROP TABLE IF EXISTS payroll CASCADE;
 DROP TABLE IF EXISTS employees CASCADE;
 

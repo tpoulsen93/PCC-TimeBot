@@ -59,9 +59,9 @@ func GetDB() *sql.DB {
 	return db
 }
 
-// GetSupervisorID returns the supervisor ID for a given employee
+// GetSupervisorID returns the supervisor ID for a given employee, or 0 if none.
 func GetSupervisorID(employeeID int) (int, error) {
-	var supervisorID int
+	var supervisorID sql.NullInt64
 	err := db.QueryRow("SELECT supervisor_id FROM employees WHERE id = $1", employeeID).Scan(&supervisorID)
 	if err == sql.ErrNoRows {
 		return 0, nil
@@ -69,7 +69,10 @@ func GetSupervisorID(employeeID int) (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("failed to get supervisor ID: %w", err)
 	}
-	return supervisorID, nil
+	if !supervisorID.Valid {
+		return 0, nil
+	}
+	return int(supervisorID.Int64), nil
 }
 
 // GetEmployeeID returns the ID for an employee given their first and last name
@@ -255,7 +258,7 @@ func AddTime(id int, date time.Time, hours float64, location string) (string, er
 }
 
 // AddEmployee creates a new employee record
-func AddEmployee(firstName, lastName string, email, phone string, superFirstName, superLastName string) (string, error) {
+func AddEmployee(firstName, lastName string, email, phone string, superFirstName, superLastName string, isAdmin bool) (string, error) {
 	var supervisorID *int
 
 	if superFirstName != "" && superLastName != "" {
@@ -277,11 +280,12 @@ func AddEmployee(firstName, lastName string, email, phone string, superFirstName
 	}
 
 	_, err := db.Exec(`
-		INSERT INTO employees (first_name, last_name, supervisor_id, phone, email, timestamp)
-		VALUES ($1, $2, $3, $4, $5, NOW())`,
+		INSERT INTO employees (first_name, last_name, supervisor_id, phone, email, is_admin, timestamp)
+		VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
 		firstName, lastName, supervisorID,
 		sql.NullString{String: phone, Valid: phone != ""},
 		sql.NullString{String: email, Valid: email != ""},
+		isAdmin,
 	)
 	if err != nil {
 		return "", fmt.Errorf("failed to add employee: %w", err)
@@ -291,7 +295,17 @@ func AddEmployee(firstName, lastName string, email, phone string, superFirstName
 		helpers.Title.String(firstName), helpers.Title.String(lastName)), nil
 }
 
-// UpdateEmployee updates an employee's information
+// updatableEmployeeColumns maps user-facing field names to database column names.
+// Only columns in this map can be updated, preventing SQL injection via field names.
+var updatableEmployeeColumns = map[string]string{
+	"first_name":    "first_name",
+	"last_name":     "last_name",
+	"phone":         "phone",
+	"email":         "email",
+	"supervisor_id": "supervisor_id",
+}
+
+// UpdateEmployee updates a single whitelisted column for an employee by name.
 func UpdateEmployee(firstName, lastName, field, value string) error {
 	id, err := GetEmployeeID(firstName, lastName)
 	if err != nil {
@@ -301,7 +315,13 @@ func UpdateEmployee(firstName, lastName, field, value string) error {
 		return fmt.Errorf("employee not found")
 	}
 
-	query := fmt.Sprintf("UPDATE employees SET %s = $1 WHERE id = $2", field)
+	column, ok := updatableEmployeeColumns[strings.ToLower(field)]
+	if !ok {
+		return fmt.Errorf("invalid field %q: allowed fields are first_name, last_name, phone, email, supervisor_id", field)
+	}
+
+	// Column name comes from a fixed allow-list, never from user input directly.
+	query := fmt.Sprintf("UPDATE employees SET %s = $1 WHERE id = $2", column)
 	_, err = db.Exec(query, value, id)
 	if err != nil {
 		return fmt.Errorf("failed to update employee: %w", err)
