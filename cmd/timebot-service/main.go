@@ -136,7 +136,7 @@ func runOnHeroku() {
 		}
 
 		c.String(http.StatusOK, result)
-	})	// SMS webhook endpoint
+	}) // SMS webhook endpoint
 	r.POST("/sms", func(c *gin.Context) {
 		// Validate Twilio signature
 		if !validateTwilioRequest(c) {
@@ -200,7 +200,7 @@ func validateTwilioRequest(c *gin.Context) bool {
 	}
 
 	validator := client.NewRequestValidator(twilioAuthToken)
-	
+
 	// Build full URL with scheme and host
 	// Use X-Forwarded-Proto header (Heroku terminates SSL at load balancer)
 	scheme := c.GetHeader("X-Forwarded-Proto")
@@ -211,7 +211,7 @@ func validateTwilioRequest(c *gin.Context) bool {
 		}
 	}
 	url := scheme + "://" + c.Request.Host + c.Request.URL.String()
-	
+
 	// Parse form data
 	c.Request.ParseForm()
 	params := make(map[string]string)

@@ -11,14 +11,13 @@ import (
 
 var nonDigit = regexp.MustCompile(`\D`)
 
-// normalizePhone strips non-digit characters and prepends +1.
-// Returns an error if the result is not exactly 10 digits.
+// normalizePhone strips non-digit characters and validates exactly 10 digits.
 func normalizePhone(input string) (string, error) {
 	digits := nonDigit.ReplaceAllString(input, "")
 	if len(digits) != 10 {
 		return "", fmt.Errorf("phone number must be 10 digits (got %d)", len(digits))
 	}
-	return "+1" + digits, nil
+	return digits, nil
 }
 
 // AddEmployee runs the interactive CLI for adding a new employee.
